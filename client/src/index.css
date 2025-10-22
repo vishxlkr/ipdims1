@@ -1,0 +1,31 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"); */
+@import "tailwindcss";
+
+* {
+   font-family: "Outfit";
+}
+
+@theme {
+   --color-primary: #5044e5;
+   --template-grid-cols-auto: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* Tailwind @apply works only inside classes */
+.active hr {
+   @apply block;
+}
+
+/* Standard CSS for pseudo-elements */
+::-webkit-scrollbar {
+   display: none;
+}
+
+html {
+   scroll-behavior: smooth;
+}
+
+@media (max-width: 740px) {
+   .active p {
+      @apply text-white bg-primary;
+   }
+}
