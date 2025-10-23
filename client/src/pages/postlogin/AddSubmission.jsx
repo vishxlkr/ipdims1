@@ -2,9 +2,12 @@ import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../../context/AppContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Loading from "../../components/Loading"; // import your Loading component
 
 const AddSubmission = () => {
-   const { token, userData } = useContext(AppContext);
+   const { token, userData, loading, setLoading } = useContext(AppContext);
    const navigate = useNavigate();
    const location = useLocation();
 
@@ -19,7 +22,6 @@ const AddSubmission = () => {
    const [authorAffiliation, setAuthorAffiliation] = useState("");
    const [eventName, setEventName] = useState("IPDIMS 2025");
    const [attachment, setAttachment] = useState(null);
-   const [loading, setLoading] = useState(false);
 
    useEffect(() => {
       if (!token || !userData) {
@@ -37,22 +39,26 @@ const AddSubmission = () => {
          const formData = new FormData();
          formData.append("title", title);
          formData.append("description", description);
-         formData.append("keywords", keywords); // now a string
+         formData.append("keywords", keywords);
          formData.append("authorName", authorName);
          formData.append("authorEmail", authorEmail);
          formData.append("authorAffiliation", authorAffiliation);
          formData.append("eventName", eventName);
-         if (attachment) formData.append("attachment", attachment); // optional
+         if (attachment) formData.append("attachment", attachment);
 
-         const res = await axios.post("/api/user/add-submission", formData, {
-            headers: {
-               Authorization: `Bearer ${token}`,
-               "Content-Type": "multipart/form-data",
-            },
-         });
+         const res = await axios.post(
+            "http://localhost:4000/api/user/add-submission",
+            formData,
+            {
+               headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "multipart/form-data",
+               },
+            }
+         );
 
          if (res.data.success) {
-            alert("Submission successfully uploaded!");
+            toast.success("Submission added successfully!");
             // Reset form
             setTitle("");
             setDescription("");
@@ -63,18 +69,23 @@ const AddSubmission = () => {
             setEventName("IPDIMS 2025");
             setAttachment(null);
          } else {
-            alert(res.data.message || "Submission failed.");
+            toast.error(
+               res.data.message || "Submission failed. Please try again."
+            );
          }
-      } catch (err) {
-         console.error(err);
-         alert("Submission failed. Please try again.");
+      } catch (error) {
+         console.error(error);
+         toast.error(error.response?.data?.message || error.message);
       } finally {
          setLoading(false);
       }
    };
 
    return (
-      <div className="bg-black text-white min-h-screen py-12 px-6 md:px-16 font-sans">
+      <div className="bg-black text-white min-h-screen py-12 px-6 md:px-16 font-sans relative">
+         {/* Show loading overlay */}
+         {loading && <Loading />}
+
          <div className="max-w-5xl mx-auto space-y-12">
             <header className="text-center">
                <h2 className="text-3xl md:text-4xl font-bold text-indigo-400 mb-6">

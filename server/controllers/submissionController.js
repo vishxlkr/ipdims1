@@ -1,6 +1,7 @@
 import submissionModel from "../models/submissionModel.js";
 import userModel from "../models/userModel.js";
 import { v2 as cloudinary } from "cloudinary";
+import sendEmail from "../config/email.js";
 
 // 🟢 Create a new submission
 export const newSubmission = async (req, res) => {
@@ -47,13 +48,42 @@ export const newSubmission = async (req, res) => {
       };
 
       // ✅ Save to MongoDB
-      const newSubmission = new submissionModel(submissionData);
-      await newSubmission.save();
+      const newSubmissionDoc = new submissionModel(submissionData);
+      await newSubmissionDoc.save();
+
+      // ✅ Send email notification to admin
+      const adminEmail = process.env.ADMIN_EMAIL; // from .env
+      const emailSubject = `New Submission by ${user.name}`;
+      const emailMessage = `
+Hello Admin,
+
+A new submission has been added by a user. Here are the details:
+
+- Name: ${user.name}
+- Email: ${user.email}
+- Affiliation: ${user.organization || "N/A"}
+- Submission Title: ${title}
+- Description: ${description}
+- Keywords: ${keywords}
+- Event: ${submissionData.eventName}
+- Attachment: ${fileUrl ? fileUrl : "No attachment"}
+
+Please review the submission in the admin panel.
+
+Thanks,
+Your Application
+      `;
+
+      await sendEmail({
+         email: adminEmail,
+         subject: emailSubject,
+         message: emailMessage,
+      });
 
       res.json({
          success: true,
-         message: "Submission added successfully",
-         submission: newSubmission,
+         message: "Submission added successfully and admin notified",
+         submission: newSubmissionDoc,
       });
    } catch (error) {
       console.error("Error in addSubmission:", error);

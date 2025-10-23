@@ -4,18 +4,20 @@ import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-const AppContextProvider = (props) => {
+const AppContextProvider = ({ children }) => {
    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
    const [token, setToken] = useState(localStorage.getItem("token") || "");
    const [userData, setUserData] = useState(null);
+   const [loading, setLoading] = useState(false);
 
    // ---------- LOAD PROFILE ----------
    const loadUserProfile = async () => {
       if (!token) return;
       try {
+         setLoading(true);
          const { data } = await axios.get(`${backendUrl}/api/user/profile`, {
-            headers: { Authorization: `Bearer ${token}` }, // ✅ Correct format
+            headers: { Authorization: `Bearer ${token}` },
          });
          if (data.success) {
             setUserData(data.user);
@@ -23,15 +25,9 @@ const AppContextProvider = (props) => {
             toast.error(data.message);
          }
       } catch (error) {
-         if (
-            error.response?.status === 401 ||
-            error.response?.data?.message?.includes("Not authorized")
-         ) {
-            toast.error("Session expired. Please login again.");
-            logout();
-         } else {
-            toast.error(error.response?.data?.message || error.message);
-         }
+         toast.error(error.response?.data?.message || error.message);
+      } finally {
+         setLoading(false);
       }
    };
 
@@ -39,16 +35,20 @@ const AppContextProvider = (props) => {
       if (token) loadUserProfile();
    }, [token]);
 
-   const value = {
-      backendUrl,
-      token,
-      setToken,
-      userData,
-      setUserData,
-   };
-
    return (
-      <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
+      <AppContext.Provider
+         value={{
+            backendUrl,
+            token,
+            setToken,
+            userData,
+            setUserData,
+            loading,
+            setLoading,
+         }}
+      >
+         {children}
+      </AppContext.Provider>
    );
 };
 

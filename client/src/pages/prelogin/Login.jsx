@@ -3,9 +3,11 @@ import { AppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+import Loading from "../../components/Loading";
 
 const Login = () => {
-   const { token, setToken, setUserData, backendUrl } = useContext(AppContext);
+   const { token, setToken, setUserData, backendUrl, loading, setLoading } =
+      useContext(AppContext);
    const navigate = useNavigate();
 
    const [step, setStep] = useState("login"); // login | signup | reset | otp | newPassword
@@ -15,7 +17,6 @@ const Login = () => {
    const [password, setPassword] = useState("");
    const [confirmPassword, setConfirmPassword] = useState("");
    const [otp, setOtp] = useState("");
-   const [loading, setLoading] = useState(false);
 
    // ---------- AUTH FUNCTIONS ----------
    const signup = async (name, email, password) => {
@@ -55,7 +56,7 @@ const Login = () => {
 
          if (data.success && tokenValue) {
             localStorage.setItem("token", tokenValue);
-            setToken(tokenValue); // ✅ Updated token from context
+            setToken(tokenValue);
             toast.success(data.message);
             return { success: true, user: data.user };
          }
@@ -82,7 +83,7 @@ const Login = () => {
 
          if (data.success && tokenValue) {
             localStorage.setItem("token", tokenValue);
-            setToken(tokenValue); // ✅ Updated token from context
+            setToken(tokenValue);
             toast.success("Login successful!");
             return { success: true, user: data.user };
          }
@@ -102,7 +103,9 @@ const Login = () => {
          setLoading(true);
          const { data } = await axios.post(
             `${backendUrl}/api/user/forgot-password`,
-            { email }
+            {
+               email,
+            }
          );
          if (data.success) {
             toast.success("OTP sent for password reset!");
@@ -176,7 +179,7 @@ const Login = () => {
          }
       } else if (step === "newPassword") {
          if (password !== confirmPassword)
-            return alert("Passwords do not match!");
+            return toast.error("Passwords do not match!");
          const res = await resetPassword(email, otp, password);
          if (res.success) navigate("/login");
       }
@@ -192,11 +195,7 @@ const Login = () => {
          className="min-h-[80vh] flex items-center justify-center"
       >
          <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg relative">
-            {loading && (
-               <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-xl z-10">
-                  <p className="text-white text-lg">Loading...</p>
-               </div>
-            )}
+            {loading && <Loading />}
 
             <p className="text-2xl font-semibold">
                {step === "login"
