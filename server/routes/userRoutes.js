@@ -15,35 +15,40 @@ import {
    newSubmission,
 } from "../controllers/submissionController.js";
 
-const router = express.Router();
+const userRouter = express.Router();
 
 // 🔓 Public routes
-router.post("/signup", signup);
-router.post("/verify-otp", verifyOtp);
-router.post("/login", login);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+userRouter.post("/signup", signup);
+userRouter.post("/verify-otp", verifyOtp);
+userRouter.post("/login", login);
+userRouter.post("/forgot-password", forgotPassword);
+userRouter.post("/reset-password", resetPassword);
 
 // 🔐 Protected routes
-router.get("/profile", authUser, getProfile);
+userRouter.get("/profile", authUser, getProfile);
 
 // Multer setup for file upload
 const storage = multer.diskStorage({});
 const upload = multer({ storage });
 
 // 📝 Submission routes
-router.post(
+userRouter.post(
    "/add-submission",
    authUser,
    upload.single("attachment"),
    newSubmission
 );
-router.get("/my-submissions", authUser, getUserSubmissions);
+userRouter.get("/my-submissions", authUser, getUserSubmissions);
 
 // Get user profile
-router.get("/profile", authUser, getProfile);
+userRouter.get("/profile", authUser, getProfile);
 
 // Update user profile
-router.post("/update-profile", authUser, updateProfile);
+userRouter.post(
+   "/update-profile",
+   authUser,
+   upload.single("image"),
+   updateProfile
+);
 
-export default router;
+export default userRouter;

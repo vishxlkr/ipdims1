@@ -23,6 +23,7 @@ import ContactUs from "./pages/prelogin/ContactUs";
 import Login from "./pages/prelogin/Login";
 import AddSubmission from "./pages/postlogin/AddSubmission";
 import MyProfile from "./pages/postlogin/MyProfile";
+import MyProfile2 from "./pages/postlogin/MyProfile2";
 import DashboardLayout from "./components/DashboardLayout";
 import MySubmissions from "./pages/postlogin/MySubmissions";
 
@@ -52,7 +53,7 @@ export default function App() {
 
             {/* profile */}
             <Route path="/dashboard" element={<DashboardLayout />}>
-               <Route path="profile" element={<MyProfile />} />
+               <Route path="profile" element={<MyProfile2 />} />
                <Route path="submissions" element={<MySubmissions />} />
             </Route>
          </Routes>

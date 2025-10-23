@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import sendEmail from "../config/email.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // Generate 6-digit OTP
 const generateOTP = () =>
@@ -286,35 +287,69 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
    try {
       const userId = req.user.id;
+      console.log("Updating profile for user:", userId);
+
+      const {
+         name,
+         phone,
+         gender,
+         designation,
+         personalUrl,
+         organisation,
+         address,
+         bio,
+      } = req.body;
+
+      const imageFile = req.file;
+
+      // Check if at least one field is provided
+      if (
+         !name &&
+         !phone &&
+         !gender &&
+         !designation &&
+         !personalUrl &&
+         !organisation &&
+         !address &&
+         !bio &&
+         !imageFile
+      ) {
+         return res.json({
+            success: false,
+            message: "No data provided to update",
+         });
+      }
+
+      // Prepare an object with only the fields that exist
       const updateData = {};
+      if (name) updateData.name = name;
+      if (phone) updateData.phone = phone;
+      if (gender) updateData.gender = gender;
+      if (designation) updateData.designation = designation;
+      if (personalUrl) updateData.personalUrl = personalUrl;
+      if (organisation) updateData.organisation = organisation;
+      if (address) updateData.address = address;
+      if (bio) updateData.bio = bio;
 
-      // Only update fields if they exist in req.body
-      const fields = [
-         "name",
-         "phone",
-         "designation",
-         "personalUrl",
-         "organization",
-         "address",
-         "bio",
-         "image",
-      ];
-      fields.forEach((field) => {
-         if (req.body[field] !== undefined) updateData[field] = req.body[field];
-      });
+      // Update user data in DB
+      await userModel.findByIdAndUpdate(userId, updateData, { new: true });
 
-      const updatedUser = await userModel.findByIdAndUpdate(
-         userId,
-         updateData,
-         { new: true }
-      );
+      // Handle image upload if provided
+      if (imageFile) {
+         const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+            resource_type: "image",
+         });
+         const imageURL = imageUpload.secure_url;
+         await userModel.findByIdAndUpdate(
+            userId,
+            { image: imageURL },
+            { new: true }
+         );
+      }
 
-      res.status(200).json({
-         success: true,
-         message: "Profile updated successfully",
-         user: updatedUser,
-      });
+      res.json({ success: true, message: "Profile updated successfully" });
    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      console.log("Error updating profile:", error);
+      res.json({ success: false, message: error.message });
    }
 };
