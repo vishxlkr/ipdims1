@@ -81,6 +81,18 @@ const AddSubmission = () => {
       }
    };
 
+   useEffect(() => {
+      if (userData) {
+         setAuthorName(userData.name || "");
+         setAuthorEmail(userData.email || "");
+         setAuthorAffiliation(userData.organization || ""); // or userData.affiliation
+      }
+   }, [userData]);
+
+   useEffect(() => {
+      console.log("Affiliation:", authorAffiliation);
+   }, [authorAffiliation]);
+
    return (
       <div className="bg-black text-white min-h-screen py-12 px-6 md:px-16 font-sans relative">
          {/* Show loading overlay */}
