@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Submission = () => {
+   const navigate = useNavigate();
    return (
       <div className="bg-black text-white min-h-screen py-12 px-6 md:px-16 font-sans">
          {/* Header Section */}
@@ -10,15 +12,12 @@ const Submission = () => {
             </h1>
 
             {/* Button */}
-            <a
-               href="https://example.com/text2" // replace with your link
-               target="_blank"
-               rel="noopener noreferrer"
-               className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold shadow-lg 
-                  hover:bg-green-700 hover:scale-105 transition-transform duration-300"
+            <button
+               onClick={() => navigate("/add-submission")}
+               className="px-6 py-3 rounded-lg bg-red-600 text-white font-semibold shadow-lg hover:bg-red-700 hover:scale-105 transition-transform duration-300"
             >
-               Click here
-            </a>
+               Add submission
+            </button>
          </div>
 
          {/* Content Section */}

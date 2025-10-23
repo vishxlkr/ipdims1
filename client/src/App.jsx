@@ -21,6 +21,7 @@ import Committee from "./pages/prelogin/Committee";
 import Venue from "./pages/prelogin/Venue";
 import ContactUs from "./pages/prelogin/ContactUs";
 import Login from "./pages/prelogin/Login";
+import AddSubmission from "./pages/postlogin/AddSubmission";
 
 export default function App() {
    return (
@@ -42,6 +43,9 @@ export default function App() {
             {/* <Route path="/my-profile" element={<MyProfile />} /> */}
             {/* <Route path="/my-appointments" element={<MyAppointments />} />
             <Route path="/appointment/:docId" element={<Appointment />} /> */}
+
+            {/* /new button */}
+            <Route path="/add-submission" element={<AddSubmission />} />
          </Routes>
 
          <Footer />

@@ -1,8 +1,10 @@
 import React from "react";
 import logo from "../../assets/logo.png";
 import nitr from "../../assets/nitr.png";
+import { useNavigate } from "react-router-dom";
 
 const App = () => {
+   const navigate = useNavigate();
    return (
       <div className="bg-black text-white min-h-screen font-sans">
          <div className="container mx-auto px-4 py-8 md:py-16 max-w-7xl">
@@ -38,23 +40,28 @@ const App = () => {
             <div className="flex justify-evenly gap-6 mb-12">
                {/* Blue Button */}
                <a
-                  href="https://example.com/text1" // replace with your link
+                  href="https://ipdims.in/wp-content/uploads/2025/09/IPDIMS-Conference-Brochure_Invitation.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-6 py-3 rounded-sm bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 hover:scale-105 transition-transform duration-300"
                >
                   IPDIMS Brochure
                </a>
+               {/* Button */}
+               <button
+                  onClick={() => navigate("/add-submission")}
+                  className="px-6 py-3 rounded-lg bg-red-600 text-white font-semibold shadow-lg hover:bg-red-700 hover:scale-105 transition-transform duration-300"
+               >
+                  Add submission
+               </button>
 
                {/* Green Button */}
-               <a
-                  href="https://example.com/text2" // replace with your link
-                  target="_blank"
-                  rel="noopener noreferrer"
+               <button
+                  onClick={() => navigate("/registration")}
                   className="px-6 py-3 rounded-sm bg-green-600 text-white font-semibold shadow-lg hover:bg-green-700 hover:scale-105 transition-transform duration-300"
                >
                   Online registration
-               </a>
+               </button>
             </div>
 
             {/* Main Content Area */}
