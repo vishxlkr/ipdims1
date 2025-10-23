@@ -245,7 +245,7 @@ const MySubmissions = () => {
                                  AUTHOR EMAIL
                               </p>
                            </div>
-                           <p className="text-white font-medium break-words">
+                           <p className="text-white font-medium ">
                               {selectedSubmission.authorEmail || "N/A"}
                            </p>
                         </div>

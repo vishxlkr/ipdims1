@@ -1098,13 +1098,10 @@ const ProfilePage = () => {
                   {/* Email */}
                   <div className="w-full bg-slate-900 rounded-xl p-4 border border-slate-700">
                      <div className="flex items-center gap-3">
-                        <Mail
-                           className="text-blue-400 flex-shrink-0"
-                           size={20}
-                        />
+                        <Mail className="text-blue-400 shrink-0" size={20} />
                         <div>
                            <p className="text-xs text-gray-400 mb-1">Email</p>
-                           <p className="text-white text-sm break-words">
+                           <p className="text-white text-sm ">
                               {userData?.email || "Not provided"}
                            </p>
                         </div>
@@ -1137,7 +1134,7 @@ const ProfilePage = () => {
                      </div>
 
                      {/* DETAILS GRID */}
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 grow">
                         {/* Reusable field function */}
                         {[
                            {

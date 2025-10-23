@@ -359,7 +359,7 @@ const ProfilePage = () => {
       <div className="max-w-4xl mx-auto p-6">
          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 h-32"></div>
+            <div className="bg-gradient-l-to-r from-blue-600 to-blue-800 h-32"></div>
 
             <div className="px-8 pb-8">
                {/* Profile Image and Actions */}
@@ -455,7 +455,7 @@ const ProfilePage = () => {
                      {/* Email (Read-only) */}
                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <Mail
-                           className="text-gray-500 mt-1 flex-shrink-0"
+                           className="text-gray-500 mt-1 shrink-0"
                            size={20}
                         />
                         <div className="flex-1">
@@ -471,7 +471,7 @@ const ProfilePage = () => {
                      {/* Phone */}
                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <Phone
-                           className="text-gray-500 mt-1 flex-shrink-0"
+                           className="text-gray-500 mt-1 shrink-0"
                            size={20}
                         />
                         <div className="flex-1">
@@ -498,7 +498,7 @@ const ProfilePage = () => {
                      {/* Gender */}
                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <User
-                           className="text-gray-500 mt-1 flex-shrink-0"
+                           className="text-gray-500 mt-1 shrink-0"
                            size={20}
                         />
                         <div className="flex-1">
@@ -528,7 +528,7 @@ const ProfilePage = () => {
                      {/* Designation */}
                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <Briefcase
-                           className="text-gray-500 mt-1 flex-shrink-0"
+                           className="text-gray-500 mt-1 shrink-0"
                            size={20}
                         />
                         <div className="flex-1">
@@ -555,7 +555,7 @@ const ProfilePage = () => {
                      {/* Organization */}
                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <Building
-                           className="text-gray-500 mt-1 flex-shrink-0"
+                           className="text-gray-500 mt-1 shrink-0"
                            size={20}
                         />
                         <div className="flex-1">
@@ -582,7 +582,7 @@ const ProfilePage = () => {
                      {/* Personal URL */}
                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <Link2
-                           className="text-gray-500 mt-1 flex-shrink-0"
+                           className="text-gray-500 mt-1 shrink-0"
                            size={20}
                         />
                         <div className="flex-1">
@@ -621,7 +621,7 @@ const ProfilePage = () => {
                   {/* Address - Full Width */}
                   <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                      <MapPin
-                        className="text-gray-500 mt-1 flex-shrink-0"
+                        className="text-gray-500 mt-1 shrink-0"
                         size={20}
                      />
                      <div className="flex-1">
