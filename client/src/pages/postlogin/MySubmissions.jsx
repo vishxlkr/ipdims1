@@ -1,280 +1,405 @@
-// import React, { useContext, useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// import { AppContext } from "../context/AppContext";
-// import axios from "axios";
-// import { toast } from "react-toastify";
-
-// const MyAppointments = () => {
-//    const { backendUrl, token } = useContext(AppContext);
-
-//    const [appointments, setAppointments] = useState([]);
-//    const months = [
-//       "",
-//       "Jan",
-//       "Feb",
-//       "Mar",
-//       "Apr",
-//       "May",
-//       "Jun",
-//       "Jul",
-//       "Aug",
-//       "Sep",
-//       "Oct",
-//       "Nov",
-//       "Dec",
-//    ];
-
-//    const navigate = useNavigate();
-
-//    const slotDateFormat = (slotDate) => {
-//       const dateArray = slotDate.split("-");
-//       return (
-//          dateArray[0] + " " + months[Number(dateArray[1])] + " " + dateArray[2]
-//       );
-//    };
-
-//    const getUserAppointments = async () => {
-//       try {
-//          const { data } = await axios.get(
-//             backendUrl + "/api/user/appointments",
-//             { headers: { token } }
-//          );
-
-//          if (data.success) {
-//             setAppointments(data.appointments.reverse());
-//             // console.log(data.appointments);
-//          }
-//       } catch (error) {
-//          console.log(error);
-//          toast.error(error.message);
-//       }
-//    };
-
-//    const cancelAppointment = async (appointmentId) => {
-//       try {
-//          const { data } = await axios.post(
-//             backendUrl + "/api/user/cancel-appointment",
-//             { appointmentId },
-//             { headers: { token } }
-//          );
-//          if (data.success) {
-//             toast.success(data.message);
-//             getUserAppointments();
-//             getDoctorsData();
-//          } else {
-//             toast.error(data.message);
-//          }
-//       } catch (error) {
-//          console.log(error);
-//          toast.error(error.message);
-//       }
-//    };
-
-//    //
-//    const initPay = (order) => {
-//       const options = {
-//          key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
-//          amount: order.amount, // Amount is in currency subunits.
-//          currency: order.currency,
-//          name: "Appointment Payment", //your business name
-//          description: "Appointment Payment",
-//          // image: "https://example.com/your_logo",
-//          order_id: order.id, // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-//          // callback_url: "https://eneqd3r9zrjok.x.pipedream.net/",
-//          // prefill: {
-//          //    //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
-//          //    name: "John Smith", //your customer's name
-//          //    email: "john.smith@example.com",
-//          //    contact: "+11234567890", //Provide the customer's phone number for better conversion rates
-//          // },
-//          // notes: {
-//          //    address: "Razorpay Corporate Office",
-//          // },
-//          // theme: {
-//          //    color: "#3399cc",
-//          // },
-//          receipt: order.receipt,
-//          handler: async (response) => {
-//             console.log(response);
-
-//             try {
-//                const { data } = await axios.post(
-//                   backendUrl + "/api/user/verifyRazorpay",
-//                   response,
-//                   { headers: { token } }
-//                );
-//                if (data.success) {
-//                   getUserAppointments();
-//                   navigate("/my-appointments");
-//                }
-//             } catch (error) {
-//                console.log(error);
-//                toast.error(error.message);
-//             }
-//          },
-//       };
-
-//       const rzp = new window.Razorpay(options);
-//       rzp.open();
-//    };
-
-//    // payment
-//    const appointmentRazorpay = async (appointmentId) => {
-//       try {
-//          const { data } = await axios.post(
-//             backendUrl + "/api/user/payment-razorpay",
-//             { appointmentId },
-//             { headers: { token } }
-//          );
-
-//          if (data.success) {
-//             initPay(data.order);
-//          }
-//       } catch (error) {
-//          console.log(error);
-//          toast.error(error.message);
-//       }
-//    };
-
-//    useEffect(() => {
-//       if (token) {
-//          getUserAppointments();
-//       }
-//    }, [token]);
-
-//    return (
-//       <div>
-//          <p className="pb-3 mt-12 font-medium text-zinc-700 border-b">
-//             My appointments
-//          </p>
-//          <div>
-//             {appointments.slice(0, 3).map((item, index) => (
-//                <div
-//                   className="grid grid-cols-[1fr_2fr] gap-4 sm:flex sm:gap-6 py-2 border-b"
-//                   key={index}
-//                >
-//                   <div>
-//                      <img
-//                         className="w-32 bg-indigo-50"
-//                         src={item.docData.image}
-//                         alt=""
-//                      />
-//                   </div>
-//                   <div className=" flex-1 text-sm  text-zinc-600">
-//                      <p className="text-neutral-800 font-semibold">
-//                         {item.docData.name}
-//                      </p>
-//                      <p>{item.docData.speciality}</p>
-//                      <p className="text-zinc-700 font-medium mt-1">Address:</p>
-//                      <p className="text-xs">{item.docData.address.line1}</p>
-//                      <p className="text-xs">{item.docData.address.line2}</p>
-//                      <p className="text-xs mt-1">
-//                         <span className="text-sm text-neutral-700 font-medium">
-//                            Date & Time :
-//                         </span>
-//                         {slotDateFormat(item.slotDate)} | {item.slotTime}
-//                      </p>
-//                   </div>
-//                   <div></div>
-//                   <div className="flex flex-col gap-2 justify-end">
-//                      {!item.cancelled && item.payment && !item.isCompleted && (
-//                         <button className="sm:min-w-48 py-2 border rounded text-stone-500 bg-indigo-50">
-//                            Paid
-//                         </button>
-//                      )}
-//                      {!item.cancelled && !item.payment && !item.isCompleted && (
-//                         <button
-//                            onClick={() => appointmentRazorpay(item._id)}
-//                            className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300"
-//                         >
-//                            Pay Online
-//                         </button>
-//                      )}
-
-//                      {!item.cancelled && !item.isCompleted && (
-//                         <button
-//                            onClick={() => cancelAppointment(item._id)}
-//                            className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-700 hover:text-white transition-all duration-300"
-//                         >
-//                            Cancel appointment
-//                         </button>
-//                      )}
-//                      {item.cancelled && !item.isCompleted && (
-//                         <button className="sm:min-w-48 py-2 border border-red-500 text-red-500">
-//                            Appointment cancelled
-//                         </button>
-//                      )}
-//                      {item.isCompleted && (
-//                         <button className="sm:min-w-48 py-2 border border-green-500 rounded text-green-500">
-//                            Completed
-//                         </button>
-//                      )}
-//                   </div>
-//                </div>
-//             ))}
-//          </div>
-//       </div>
-//    );
-// };
-
-// export default MyAppointments;
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-// import React, { useContext, useEffect, useState } from "react";
-// import { AppContext } from "../context/AppContext";
-// import axios from "axios";
-// import { toast } from "react-toastify";
-
-// const MySubmissions = () => {
-//    const { token, userData, backendUrl } = useContext(AppContext);
-//    const [submissions, setSubmissions] = useState([]);
-
-//    useEffect(() => {
-//       const fetchSubmissions = async () => {
-//          try {
-//             const { data } = await axios.get(
-//                `${backendUrl}/api/user/my-submissions`,
-//                { headers: { Authorization: `Bearer ${token}` } }
-//             );
-//             if (data.success) setSubmissions(data.submissions);
-//          } catch (error) {
-//             toast.error(error.response?.data?.message || error.message);
-//          }
-//       };
-//       fetchSubmissions();
-//    }, [token]);
-
-//    return (
-//       <div className="space-y-4">
-//          <h2 className="text-2xl font-bold mb-4">My Submissions</h2>
-//          {submissions.length === 0 ? (
-//             <p>No submissions yet.</p>
-//          ) : (
-//             <div className="space-y-2">
-//                {submissions.map((sub) => (
-//                   <div
-//                      key={sub._id}
-//                      className="p-4 bg-gray-700 rounded hover:bg-gray-600 transition"
-//                   >
-//                      <h3 className="font-semibold">{sub.title}</h3>
-//                      <p>{sub.description}</p>
-//                      <p>Status: {sub.status}</p>
-//                   </div>
-//                ))}
-//             </div>
-//          )}
-//       </div>
-//    );
-// };
-
-// export default MySubmissions;
-
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { AppContext } from "../../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
+import {
+   FileText,
+   Clock,
+   CheckCircle,
+   XCircle,
+   Download,
+   X,
+   Calendar,
+   User,
+   Mail,
+   Building,
+   Tag,
+   AlignLeft,
+   Eye,
+} from "lucide-react";
 
 const MySubmissions = () => {
-   return <div>my submision</div>;
+   const { token, backendUrl } = useContext(AppContext);
+   const [submissions, setSubmissions] = useState([]);
+   const [loading, setLoading] = useState(true);
+   const [selectedSubmission, setSelectedSubmission] = useState(null);
+
+   // Fetch user submissions
+   useEffect(() => {
+      const fetchSubmissions = async () => {
+         try {
+            const { data } = await axios.get(
+               `${backendUrl}/api/user/my-submissions`,
+               {
+                  headers: {
+                     Authorization: `Bearer ${token}`,
+                  },
+               }
+            );
+
+            if (data.success) {
+               setSubmissions(data.submissions || []);
+            } else {
+               toast.error(data.message || "Failed to fetch submissions");
+            }
+         } catch (error) {
+            toast.error(
+               error.response?.data?.message || "Error fetching submissions"
+            );
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      fetchSubmissions();
+   }, [token, backendUrl]);
+
+   const openSubmissionModal = (submission) => {
+      setSelectedSubmission(submission);
+   };
+
+   const closeSubmissionModal = () => {
+      setSelectedSubmission(null);
+   };
+
+   if (loading) {
+      return (
+         <div className="flex items-center justify-center min-h-screen bg-slate-900">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+         </div>
+      );
+   }
+
+   return (
+      <div className="min-h-screen bg-slate-900 text-white p-6">
+         <div className="max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold mb-6 text-center text-white">
+               My Submissions
+            </h1>
+
+            {submissions.length === 0 ? (
+               <div className="text-center text-gray-400 mt-20">
+                  <FileText size={40} className="mx-auto mb-4 opacity-60" />
+                  <p className="text-lg">
+                     You haven't made any submissions yet.
+                  </p>
+               </div>
+            ) : (
+               <div className="bg-slate-800 rounded-2xl shadow-xl border border-slate-700 overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                     <thead className="bg-slate-700 text-gray-300">
+                        <tr>
+                           <th className="py-3 px-6 text-sm font-semibold">
+                              #
+                           </th>
+                           <th className="py-3 px-6 text-sm font-semibold">
+                              Title
+                           </th>
+                           <th className="py-3 px-6 text-sm font-semibold">
+                              Event Name
+                           </th>
+                           <th className="py-3 px-6 text-sm font-semibold">
+                              Date
+                           </th>
+                           <th className="py-3 px-6 text-sm font-semibold">
+                              Status
+                           </th>
+                           <th className="py-3 px-6 text-sm font-semibold text-center">
+                              Actions
+                           </th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        {submissions.map((sub, index) => (
+                           <tr
+                              key={sub._id}
+                              className="border-t border-slate-700 hover:bg-slate-750 transition cursor-pointer"
+                              onClick={() => openSubmissionModal(sub)}
+                           >
+                              <td className="py-3 px-6 text-gray-400">
+                                 {index + 1}
+                              </td>
+                              <td className="py-3 px-6 font-medium">
+                                 {sub.title || "Untitled"}
+                              </td>
+                              <td className="py-3 px-6 text-gray-400">
+                                 {sub.eventName || "—"}
+                              </td>
+                              <td className="py-3 px-6 text-gray-400">
+                                 {new Date(sub.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="py-3 px-6">
+                                 {sub.status === "Approved" ||
+                                 sub.status === "approved" ? (
+                                    <div className="flex items-center gap-2 text-green-400 font-medium">
+                                       <CheckCircle size={18} /> Approved
+                                    </div>
+                                 ) : sub.status === "Rejected" ||
+                                   sub.status === "rejected" ? (
+                                    <div className="flex items-center gap-2 text-red-400 font-medium">
+                                       <XCircle size={18} /> Rejected
+                                    </div>
+                                 ) : (
+                                    <div className="flex items-center gap-2 text-yellow-400 font-medium">
+                                       <Clock size={18} /> Pending
+                                    </div>
+                                 )}
+                              </td>
+                              <td className="py-3 px-6 text-center">
+                                 <button
+                                    onClick={(e) => {
+                                       e.stopPropagation();
+                                       openSubmissionModal(sub);
+                                    }}
+                                    className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105"
+                                 >
+                                    <Eye size={16} /> View
+                                 </button>
+                              </td>
+                           </tr>
+                        ))}
+                     </tbody>
+                  </table>
+               </div>
+            )}
+         </div>
+
+         {/* Modal */}
+         {selectedSubmission && (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+               <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                  {/* Modal Header */}
+                  <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex items-center justify-between z-10">
+                     <h2 className="text-2xl font-bold text-white">
+                        Submission Details
+                     </h2>
+                     <button
+                        onClick={closeSubmissionModal}
+                        className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-slate-700 rounded-lg"
+                     >
+                        <X size={24} />
+                     </button>
+                  </div>
+
+                  {/* Modal Content */}
+                  <div className="p-6 space-y-6">
+                     {/* Status Badge */}
+                     <div className="flex items-center justify-between">
+                        <div>
+                           {selectedSubmission.status === "Approved" ||
+                           selectedSubmission.status === "approved" ? (
+                              <div className="flex items-center gap-2 text-green-400 font-semibold text-lg">
+                                 <CheckCircle size={24} /> Approved
+                              </div>
+                           ) : selectedSubmission.status === "Rejected" ||
+                             selectedSubmission.status === "rejected" ? (
+                              <div className="flex items-center gap-2 text-red-400 font-semibold text-lg">
+                                 <XCircle size={24} /> Rejected
+                              </div>
+                           ) : (
+                              <div className="flex items-center gap-2 text-yellow-400 font-semibold text-lg">
+                                 <Clock size={24} /> Pending
+                              </div>
+                           )}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                           <Calendar className="inline mr-1" size={16} />
+                           {new Date(
+                              selectedSubmission.createdAt
+                           ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                           })}
+                        </div>
+                     </div>
+
+                     {/* Title */}
+                     <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                        <h3 className="text-lg font-bold text-white mb-2">
+                           {selectedSubmission.title || "Untitled"}
+                        </h3>
+                        <p className="text-sm text-gray-400">
+                           Event: {selectedSubmission.eventName || "N/A"}
+                        </p>
+                     </div>
+
+                     {/* Author Details */}
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                           <div className="flex items-center gap-3 mb-2">
+                              <User className="text-blue-400" size={20} />
+                              <p className="text-xs text-gray-400 font-medium">
+                                 AUTHOR NAME
+                              </p>
+                           </div>
+                           <p className="text-white font-medium">
+                              {selectedSubmission.authorName || "N/A"}
+                           </p>
+                        </div>
+
+                        <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                           <div className="flex items-center gap-3 mb-2">
+                              <Mail className="text-blue-400" size={20} />
+                              <p className="text-xs text-gray-400 font-medium">
+                                 AUTHOR EMAIL
+                              </p>
+                           </div>
+                           <p className="text-white font-medium break-words">
+                              {selectedSubmission.authorEmail || "N/A"}
+                           </p>
+                        </div>
+
+                        {selectedSubmission.authorAffiliation && (
+                           <div className="bg-slate-900 rounded-xl p-4 border border-slate-700 md:col-span-2">
+                              <div className="flex items-center gap-3 mb-2">
+                                 <Building
+                                    className="text-blue-400"
+                                    size={20}
+                                 />
+                                 <p className="text-xs text-gray-400 font-medium">
+                                    AFFILIATION
+                                 </p>
+                              </div>
+                              <p className="text-white font-medium">
+                                 {selectedSubmission.authorAffiliation}
+                              </p>
+                           </div>
+                        )}
+                     </div>
+
+                     {/* Description */}
+                     {selectedSubmission.description && (
+                        <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                           <div className="flex items-center gap-3 mb-3">
+                              <AlignLeft className="text-blue-400" size={20} />
+                              <p className="text-xs text-gray-400 font-medium">
+                                 DESCRIPTION
+                              </p>
+                           </div>
+                           <p className="text-white leading-relaxed whitespace-pre-wrap">
+                              {selectedSubmission.description}
+                           </p>
+                        </div>
+                     )}
+
+                     {/* Keywords */}
+                     {selectedSubmission.keywords &&
+                        selectedSubmission.keywords.length > 0 && (
+                           <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                              <div className="flex items-center gap-3 mb-3">
+                                 <Tag className="text-blue-400" size={20} />
+                                 <p className="text-xs text-gray-400 font-medium">
+                                    KEYWORDS
+                                 </p>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                 {selectedSubmission.keywords.map(
+                                    (keyword, idx) => (
+                                       <span
+                                          key={idx}
+                                          className="bg-blue-600 bg-opacity-20 text-blue-400 px-3 py-1 rounded-lg text-sm font-medium border border-blue-500 border-opacity-30"
+                                       >
+                                          {keyword}
+                                       </span>
+                                    )
+                                 )}
+                              </div>
+                           </div>
+                        )}
+
+                     {/* Attachment */}
+                     {selectedSubmission.attachment && (
+                        <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                           <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <FileText
+                                    className="text-blue-400"
+                                    size={20}
+                                 />
+                                 <div>
+                                    <p className="text-xs text-gray-400 font-medium mb-1">
+                                       ATTACHMENT
+                                    </p>
+                                    <p className="text-white font-medium text-sm">
+                                       Paper Submission
+                                    </p>
+                                 </div>
+                              </div>
+                              <a
+                                 href={selectedSubmission.attachment}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+                              >
+                                 <Download size={18} />
+                                 Download
+                              </a>
+                           </div>
+                        </div>
+                     )}
+
+                     {/* Payment Screenshot */}
+                     {selectedSubmission.paymentScreenshot && (
+                        <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                           <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <FileText
+                                    className="text-green-400"
+                                    size={20}
+                                 />
+                                 <div>
+                                    <p className="text-xs text-gray-400 font-medium mb-1">
+                                       PAYMENT PROOF
+                                    </p>
+                                    <p className="text-white font-medium text-sm">
+                                       Payment Screenshot
+                                    </p>
+                                 </div>
+                              </div>
+                              <a
+                                 href={selectedSubmission.paymentScreenshot}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+                              >
+                                 <Download size={18} />
+                                 View
+                              </a>
+                           </div>
+                        </div>
+                     )}
+
+                     {/* Reviewer Info */}
+                     {selectedSubmission.reviewer && (
+                        <div className="bg-slate-900 rounded-xl p-4 border border-slate-700">
+                           <div className="flex items-center gap-3 mb-2">
+                              <User className="text-purple-400" size={20} />
+                              <p className="text-xs text-gray-400 font-medium">
+                                 REVIEWER
+                              </p>
+                           </div>
+                           <p className="text-white font-medium">
+                              {selectedSubmission.reviewer}
+                           </p>
+                        </div>
+                     )}
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="sticky bottom-0 bg-slate-800 border-t border-slate-700 p-6 flex justify-end">
+                     <button
+                        onClick={closeSubmissionModal}
+                        className="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium transition-all"
+                     >
+                        Close
+                     </button>
+                  </div>
+               </div>
+            </div>
+         )}
+      </div>
+   );
 };
 
 export default MySubmissions;
