@@ -264,6 +264,7 @@ export const resetPassword = async (req, res) => {
 export const getProfile = async (req, res) => {
    try {
       // req.user must be set by auth middleware
+      const userId = req.user.id;
       const user = await userModel.findById(req.user.id).select("-password");
       if (!user) {
          return res
@@ -277,5 +278,43 @@ export const getProfile = async (req, res) => {
          success: false,
          message: "Server error while fetching profile.",
       });
+   }
+};
+
+// ======================= update PROFILE =======================
+
+export const updateProfile = async (req, res) => {
+   try {
+      const userId = req.user.id;
+      const updateData = {};
+
+      // Only update fields if they exist in req.body
+      const fields = [
+         "name",
+         "phone",
+         "designation",
+         "personalUrl",
+         "organization",
+         "address",
+         "bio",
+         "image",
+      ];
+      fields.forEach((field) => {
+         if (req.body[field] !== undefined) updateData[field] = req.body[field];
+      });
+
+      const updatedUser = await userModel.findByIdAndUpdate(
+         userId,
+         updateData,
+         { new: true }
+      );
+
+      res.status(200).json({
+         success: true,
+         message: "Profile updated successfully",
+         user: updatedUser,
+      });
+   } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
    }
 };

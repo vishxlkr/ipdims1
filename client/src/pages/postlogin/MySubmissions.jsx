@@ -220,10 +220,61 @@
 
 // export default MyAppointments;
 
+////////////////////////////////////////////////////////////////////////////////////////
+
+// import React, { useContext, useEffect, useState } from "react";
+// import { AppContext } from "../context/AppContext";
+// import axios from "axios";
+// import { toast } from "react-toastify";
+
+// const MySubmissions = () => {
+//    const { token, userData, backendUrl } = useContext(AppContext);
+//    const [submissions, setSubmissions] = useState([]);
+
+//    useEffect(() => {
+//       const fetchSubmissions = async () => {
+//          try {
+//             const { data } = await axios.get(
+//                `${backendUrl}/api/user/my-submissions`,
+//                { headers: { Authorization: `Bearer ${token}` } }
+//             );
+//             if (data.success) setSubmissions(data.submissions);
+//          } catch (error) {
+//             toast.error(error.response?.data?.message || error.message);
+//          }
+//       };
+//       fetchSubmissions();
+//    }, [token]);
+
+//    return (
+//       <div className="space-y-4">
+//          <h2 className="text-2xl font-bold mb-4">My Submissions</h2>
+//          {submissions.length === 0 ? (
+//             <p>No submissions yet.</p>
+//          ) : (
+//             <div className="space-y-2">
+//                {submissions.map((sub) => (
+//                   <div
+//                      key={sub._id}
+//                      className="p-4 bg-gray-700 rounded hover:bg-gray-600 transition"
+//                   >
+//                      <h3 className="font-semibold">{sub.title}</h3>
+//                      <p>{sub.description}</p>
+//                      <p>Status: {sub.status}</p>
+//                   </div>
+//                ))}
+//             </div>
+//          )}
+//       </div>
+//    );
+// };
+
+// export default MySubmissions;
+
 import React from "react";
 
-const MyAppointments = () => {
-   return <div>my submsion</div>;
+const MySubmissions = () => {
+   return <div>my submision</div>;
 };
 
-export default MyAppointments;
+export default MySubmissions;

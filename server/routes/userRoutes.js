@@ -7,6 +7,7 @@ import {
    forgotPassword,
    resetPassword,
    getProfile,
+   updateProfile,
 } from "../controllers/userController.js"; // Move submissionController functions here
 import authUser from "../middlewares/authUser.js";
 import {
@@ -38,5 +39,11 @@ router.post(
    newSubmission
 );
 router.get("/my-submissions", authUser, getUserSubmissions);
+
+// Get user profile
+router.get("/profile", authUser, getProfile);
+
+// Update user profile
+router.post("/update-profile", authUser, updateProfile);
 
 export default router;

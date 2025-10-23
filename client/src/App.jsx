@@ -22,13 +22,16 @@ import Venue from "./pages/prelogin/Venue";
 import ContactUs from "./pages/prelogin/ContactUs";
 import Login from "./pages/prelogin/Login";
 import AddSubmission from "./pages/postlogin/AddSubmission";
+import MyProfile from "./pages/postlogin/MyProfile";
+import DashboardLayout from "./components/DashboardLayout";
+import MySubmissions from "./pages/postlogin/MySubmissions";
 
 export default function App() {
    return (
       <div className="pt-16 bg-black">
          <ToastContainer />
-         <Navbar />
 
+         <Navbar />
          <Routes>
             {/* ------------------ Pre-login pages ------------------ */}
             <Route path="/" element={<Home />} />
@@ -46,6 +49,12 @@ export default function App() {
 
             {/* /new button */}
             <Route path="/add-submission" element={<AddSubmission />} />
+
+            {/* profile */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
+               <Route path="profile" element={<MyProfile />} />
+               <Route path="submissions" element={<MySubmissions />} />
+            </Route>
          </Routes>
 
          <Footer />
