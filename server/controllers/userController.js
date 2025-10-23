@@ -282,4 +282,4 @@ export const getProfile = async (req, res) => {
 
 
 git quick
-git quickgit quick
+git quickgit quickgit quick
