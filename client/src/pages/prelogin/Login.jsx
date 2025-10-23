@@ -1,136 +1,215 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context/AppContext";
-import axios from "axios";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-   const { backendUrl, token, setToken } = useContext(AppContext);
+   const {
+      signup,
+      verifyOtp,
+      login,
+      forgotPassword,
+      resetPassword,
+      token,
+      setUserData,
+      loading,
+   } = useContext(AppContext);
+
    const navigate = useNavigate();
-
-   const [state, setState] = useState("Sign Up");
-
+   const [step, setStep] = useState("login");
+   const [purpose, setPurpose] = useState("");
+   const [name, setName] = useState("");
    const [email, setEmail] = useState("");
    const [password, setPassword] = useState("");
-   const [name, setName] = useState("");
+   const [confirmPassword, setConfirmPassword] = useState("");
+   const [otp, setOtp] = useState("");
 
-   const onSubmitHandler = async (event) => {
-      event.preventDefault();
+   const handleSubmit = async (e) => {
+      e.preventDefault();
 
-      try {
-         if (state === "Sign Up") {
-            const { data } = await axios.post(
-               backendUrl + "/api/user/register",
-               {
-                  name,
-                  password,
-                  email,
-               }
-            );
-
-            if (data.success) {
-               localStorage.setItem("token", data.token);
-               setToken(data.token);
-            } else {
-               toast.error(data.message);
-            }
-         } else {
-            const { data } = await axios.post(backendUrl + "/api/user/login", {
-               password,
-               email,
-            });
-
-            if (data.success) {
-               localStorage.setItem("token", data.token);
-               setToken(data.token);
-            } else {
-               toast.error(data.message);
+      if (step === "signup") {
+         const res = await signup(name, email, password);
+         if (res.success) {
+            setPurpose("signup");
+            setStep("otp");
+         }
+      } else if (step === "login") {
+         const res = await login(email, password);
+         if (res.success) {
+            setUserData(res.user);
+            navigate("/");
+         }
+      } else if (step === "reset") {
+         const res = await forgotPassword(email);
+         if (res.success) {
+            setPurpose("reset");
+            setStep("otp");
+         }
+      } else if (step === "otp") {
+         const res = await verifyOtp(email, otp);
+         if (res.success) {
+            if (purpose === "signup") {
+               setUserData(res.user);
+               navigate("/");
+            } else if (purpose === "reset") {
+               setStep("newPassword");
             }
          }
-      } catch (error) {
-         toast.error(error.message);
+      } else if (step === "newPassword") {
+         if (password !== confirmPassword)
+            return alert("Passwords do not match!");
+         const res = await resetPassword(email, otp, password);
+         if (res.success) navigate("/login");
       }
    };
 
    useEffect(() => {
-      if (token) {
-         navigate("/");
-      }
+      if (token) navigate("/");
    }, [token]);
 
    return (
       <form
-         onSubmit={onSubmitHandler}
-         className="min-h-[80vh] flex items-center"
+         onSubmit={handleSubmit}
+         className="min-h-[80vh] flex items-center justify-center"
       >
-         <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg">
-            <p className="text-2xl font-semibold">
-               {state === "Sign Up" ? "Create Account" : "Login"}
-            </p>
-            <p>
-               Please {state === "Sign Up" ? "sign up" : "log in"} to book
-               appointment
-            </p>
-            {state === "Sign Up" && (
-               <div className="w-full">
-                  <p>Full Name</p>
-                  <input
-                     className="border border-zinc-300 rounded w-full p-2 mt-1"
-                     type="text"
-                     onChange={(e) => setName(e.target.value)}
-                     value={name}
-                     required
-                  />
+         <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg relative">
+            {loading && (
+               <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-xl z-10">
+                  <p className="text-white text-lg">Loading...</p>
                </div>
             )}
 
-            <div className="w-full">
-               <p>Email</p>
+            <p className="text-2xl font-semibold">
+               {step === "login"
+                  ? "Login"
+                  : step === "signup"
+                  ? "Sign Up"
+                  : step === "reset"
+                  ? "Reset Password"
+                  : step === "otp"
+                  ? "Enter OTP"
+                  : "Set New Password"}
+            </p>
+
+            {step === "signup" && (
                <input
-                  className="border border-zinc-300 rounded w-full p-2 mt-1"
+                  type="text"
+                  placeholder="Full Name"
+                  className="border p-2 w-full rounded"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+               />
+            )}
+
+            {step !== "otp" && step !== "newPassword" && (
+               <input
                   type="email"
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  className="border p-2 w-full rounded"
                   value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                />
-            </div>
-            <div className="w-full">
-               <p>Password</p>
+            )}
+
+            {(step === "login" ||
+               step === "signup" ||
+               step === "newPassword") && (
                <input
-                  className="border border-zinc-300 rounded w-full p-2 mt-1"
                   type="password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={
+                     step === "newPassword" ? "New Password" : "Password"
+                  }
+                  className="border p-2 w-full rounded"
                   value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                />
-            </div>
+            )}
+
+            {step === "newPassword" && (
+               <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  className="border p-2 w-full rounded"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+               />
+            )}
+
+            {step === "otp" && (
+               <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  className="border p-2 w-full rounded"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+               />
+            )}
+
             <button
                type="submit"
-               className="bg-primary text-white w-full py-2 rounded-md text-base cursor-pointer"
+               className="bg-primary text-white w-full py-2 rounded-md mt-2"
             >
-               {state === "Sign Up" ? "Create Account" : "Login"}
+               {step === "login"
+                  ? "Login"
+                  : step === "signup"
+                  ? "Sign Up"
+                  : step === "reset"
+                  ? "Send OTP"
+                  : step === "otp"
+                  ? "Verify OTP"
+                  : "Save Password"}
             </button>
-            {state === "Sign Up" ? (
-               <p>
-                  Already have an account ?{" "}
-                  <span
-                     onClick={() => setState("Login")}
-                     className="text-primary underline cursor-pointer"
-                  >
-                     Login here
-                  </span>
-               </p>
-            ) : (
-               <p>
-                  Create a new account ?{" "}
-                  <span
-                     onClick={() => setState("Sign Up")}
-                     className="text-primary underline cursor-pointer"
-                  >
-                     click here
-                  </span>
-               </p>
-            )}
+
+            <div className="w-full mt-2 text-sm">
+               {step === "login" && (
+                  <>
+                     <p>
+                        Forgot password?{" "}
+                        <span
+                           onClick={() => setStep("reset")}
+                           className="text-primary underline cursor-pointer"
+                        >
+                           Reset
+                        </span>
+                     </p>
+                     <p>
+                        New user?{" "}
+                        <span
+                           onClick={() => setStep("signup")}
+                           className="text-primary underline cursor-pointer"
+                        >
+                           Sign Up
+                        </span>
+                     </p>
+                  </>
+               )}
+               {step === "signup" && (
+                  <p>
+                     Already have an account?{" "}
+                     <span
+                        onClick={() => setStep("login")}
+                        className="text-primary underline cursor-pointer"
+                     >
+                        Login
+                     </span>
+                  </p>
+               )}
+               {step === "reset" && (
+                  <p>
+                     Back to{" "}
+                     <span
+                        onClick={() => setStep("login")}
+                        className="text-primary underline cursor-pointer"
+                     >
+                        Login
+                     </span>
+                  </p>
+               )}
+            </div>
          </div>
       </form>
    );

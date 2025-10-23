@@ -6,16 +6,12 @@ export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
    const backendUrl = import.meta.env.VITE_BACKEND_URL;
-   const currencySymbol = "$";
 
-   const [token, setToken] = useState(
-      localStorage.getItem("token") ? localStorage.getItem("token") : false
-   );
-   const [userData, setUserData] = useState(false);
-   const [otpSent, setOtpSent] = useState(false);
+   const [token, setToken] = useState(localStorage.getItem("token") || "");
+   const [userData, setUserData] = useState(null);
    const [loading, setLoading] = useState(false);
 
-   // ------------------ AUTH FUNCTIONS ------------------
+   // ---------- AUTH FUNCTIONS ----------
 
    const signup = async (name, email, password) => {
       try {
@@ -25,16 +21,17 @@ const AppContextProvider = (props) => {
             email,
             password,
          });
-         setLoading(false);
          if (data.success) {
-            setOtpSent(true);
-            toast.success("OTP sent to your email");
-         } else {
-            toast.error(data.message);
+            toast.success("OTP sent to your email!");
+            return { success: true };
          }
+         toast.error(data.message);
+         return { success: false };
       } catch (error) {
-         setLoading(false);
          toast.error(error.response?.data?.message || error.message);
+         return { success: false };
+      } finally {
+         setLoading(false);
       }
    };
 
@@ -48,17 +45,24 @@ const AppContextProvider = (props) => {
                otp,
             }
          );
-         setLoading(false);
-         if (data.success) {
-            localStorage.setItem("token", data.token);
-            setToken(data.token);
-            toast.success("Signup successful!");
-         } else {
-            toast.error(data.message);
+
+         // FIX: some backends return token inside user object
+         const tokenValue = data.token || data.user?.token;
+
+         if (data.success && tokenValue) {
+            localStorage.setItem("token", tokenValue);
+            setToken(tokenValue);
+            toast.success("Account verified!");
+            return { success: true, user: data.user };
          }
+
+         toast.error(data.message || "Verification failed");
+         return { success: false };
       } catch (error) {
-         setLoading(false);
          toast.error(error.response?.data?.message || error.message);
+         return { success: false };
+      } finally {
+         setLoading(false);
       }
    };
 
@@ -69,38 +73,51 @@ const AppContextProvider = (props) => {
             email,
             password,
          });
-         setLoading(false);
-         if (data.success) {
-            localStorage.setItem("token", data.token);
-            setToken(data.token);
+
+         // FIX: token is inside data.user.token
+         const tokenValue = data.token || data.user?.token;
+
+         if (data.success && tokenValue) {
+            localStorage.setItem("token", tokenValue);
+            setToken(tokenValue);
             toast.success("Login successful!");
-         } else {
-            toast.error(data.message);
+            return { success: true, user: data.user };
          }
+
+         toast.error(data.message || "Login failed");
+         return { success: false };
       } catch (error) {
-         setLoading(false);
          toast.error(error.response?.data?.message || error.message);
+         return { success: false };
+      } finally {
+         setLoading(false);
       }
    };
 
    const forgotPassword = async (email) => {
       try {
+         setLoading(true);
          const { data } = await axios.post(
             `${backendUrl}/api/user/forgot-password`,
             { email }
          );
          if (data.success) {
-            toast.success("OTP sent to your email for password reset");
-         } else {
-            toast.error(data.message);
+            toast.success("OTP sent for password reset!");
+            return { success: true };
          }
+         toast.error(data.message);
+         return { success: false };
       } catch (error) {
          toast.error(error.response?.data?.message || error.message);
+         return { success: false };
+      } finally {
+         setLoading(false);
       }
    };
 
    const resetPassword = async (email, otp, newPassword) => {
       try {
+         setLoading(true);
          const { data } = await axios.post(
             `${backendUrl}/api/user/reset-password`,
             {
@@ -110,29 +127,32 @@ const AppContextProvider = (props) => {
             }
          );
          if (data.success) {
-            toast.success("Password reset successful!");
-         } else {
-            toast.error(data.message);
+            toast.success("Password updated successfully!");
+            return { success: true };
          }
+         toast.error(data.message);
+         return { success: false };
       } catch (error) {
          toast.error(error.response?.data?.message || error.message);
+         return { success: false };
+      } finally {
+         setLoading(false);
       }
    };
 
    const logout = () => {
-      setToken(false);
-      setUserData(false);
+      setToken("");
+      setUserData(null);
       localStorage.removeItem("token");
       toast.success("Logged out successfully");
    };
 
-   // ------------------ PROFILE LOADING ------------------
-
-   const loadUserProfileData = async () => {
+   // ---------- LOAD PROFILE ----------
+   const loadUserProfile = async () => {
       if (!token) return;
       try {
          const { data } = await axios.get(`${backendUrl}/api/user/profile`, {
-            headers: { token },
+            headers: { Authorization: `Bearer ${token}` }, // ✅ Correct format
          });
          if (data.success) {
             setUserData(data.user);
@@ -140,39 +160,34 @@ const AppContextProvider = (props) => {
             toast.error(data.message);
          }
       } catch (error) {
-         toast.error(error.response?.data?.message || error.message);
+         if (
+            error.response?.status === 401 ||
+            error.response?.data?.message?.includes("Not authorized")
+         ) {
+            toast.error("Session expired. Please login again.");
+            logout();
+         } else {
+            toast.error(error.response?.data?.message || error.message);
+         }
       }
    };
 
-   // ------------------ AUTO LOAD PROFILE ------------------
-
    useEffect(() => {
-      if (token) {
-         loadUserProfileData();
-      } else {
-         setUserData(false);
-      }
+      if (token) loadUserProfile();
    }, [token]);
-
-   // ------------------ CONTEXT VALUE ------------------
 
    const value = {
       backendUrl,
-      currencySymbol,
       token,
-      setToken,
       userData,
-      setUserData,
+      loading,
       signup,
       verifyOtp,
       login,
       forgotPassword,
       resetPassword,
       logout,
-      loadUserProfileData,
-      otpSent,
-      setOtpSent,
-      loading,
+      setUserData,
    };
 
    return (

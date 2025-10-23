@@ -2,18 +2,19 @@ import jwt from "jsonwebtoken";
 
 const authUser = async (req, res, next) => {
    try {
-      const { token } = req.headers;
-
-      if (!token) {
+      // 1️⃣ get token from Authorization header
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
          return res.status(401).json({
             success: false,
             message: "Not authorized. Please login again.",
          });
       }
 
-      // verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const token = authHeader.split(" ")[1]; // get the actual token
 
+      // 2️⃣ verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (!decoded || !decoded.id) {
          return res.status(401).json({
             success: false,
@@ -21,9 +22,7 @@ const authUser = async (req, res, next) => {
          });
       }
 
-      // ✅ old style: attach directly to request
-      req.userId = decoded.id;
-
+      req.user = { id: decoded.id }; // attach user info
       next();
    } catch (error) {
       console.error("Auth Error:", error.message);

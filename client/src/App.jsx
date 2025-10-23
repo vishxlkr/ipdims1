@@ -31,13 +31,17 @@ export default function App() {
          <Routes>
             {/* ------------------ Pre-login pages ------------------ */}
             <Route path="/" element={<Home />} />
-            {/* <Route path="/login" element={<Login />} /> */}
+            <Route path="/login" element={<Login />} />
             <Route path="/submission" element={<Submission />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/important-dates" element={<ImportantDates />} />
             <Route path="/committee" element={<Committee />} />
             <Route path="/venue" element={<Venue />} />
             <Route path="/contact-us" element={<ContactUs />} />
+            {/* ---------------post login pages ------------- */}
+            {/* <Route path="/my-profile" element={<MyProfile />} /> */}
+            {/* <Route path="/my-appointments" element={<MyAppointments />} />
+            <Route path="/appointment/:docId" element={<Appointment />} /> */}
          </Routes>
 
          <Footer />
