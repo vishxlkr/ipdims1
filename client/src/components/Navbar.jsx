@@ -1,25 +1,27 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify"; // ✅ added import
 import logo from "../assets/logo.png";
-import { AppContext } from "../context/AppContext"; // ✅ context import
+import { AppContext } from "../context/AppContext";
 
 const Navbar = () => {
    const navigate = useNavigate();
-   const { token, userData, logout } = useContext(AppContext); // ✅ use logout from context
+   const { token, setToken, userData, setUserData } = useContext(AppContext); // ✅ added setToken
 
    const [menuOpen, setMenuOpen] = useState(false);
    const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-   useEffect(() => {
-      document.body.style.overflow = menuOpen ? "hidden" : "";
-   }, [menuOpen]);
+   console.log("Navbar userData:", userData);
 
-   // ✅ Remove old local logout and use context.logout
    const handleLogout = () => {
-      logout(); // This will clear token + userData + show toast
+      // ✅ Clear everything in correct order
+      setToken("");
+      setUserData(null);
+      localStorage.removeItem("token");
       setProfileMenuOpen(false);
       setMenuOpen(false);
-      navigate("/"); // redirect to home
+      toast.success("Logged out successfully");
+      navigate("/");
    };
 
    const navLinks = [
@@ -28,7 +30,7 @@ const Navbar = () => {
       { path: "/important-dates", label: "Important Dates" },
       { path: "/registration", label: "Registration" },
       { path: "/committee", label: "Committee" },
-      { path: "/venue", label: "Venue & Accomodation" },
+      { path: "/venue", label: "Venue & Accommodation" },
       { path: "/contact-us", label: "Contact" },
    ];
 
@@ -83,9 +85,9 @@ const Navbar = () => {
                         onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                      >
                         <img
-                           src={userData.image}
+                           src={userData.image || "/default-avatar.png"}
                            alt="user"
-                           className="w-8 h-8 rounded-full"
+                           className="w-8 h-8 rounded-full object-cover"
                         />
                         {profileMenuOpen && (
                            <div className="absolute right-0 mt-2 w-36 bg-stone-100 rounded shadow-lg flex flex-col p-2 z-50">
@@ -99,7 +101,7 @@ const Navbar = () => {
                                  Dashboard
                               </p>
                               <p
-                                 onClick={handleLogout} // ✅ use correct logout
+                                 onClick={handleLogout}
                                  className="hover:text-black cursor-pointer py-1 px-2"
                               >
                                  Logout
@@ -160,7 +162,7 @@ const Navbar = () => {
                         Dashboard
                      </p>
                      <p
-                        onClick={handleLogout} // ✅ here also use context logout
+                        onClick={handleLogout}
                         className="px-4 py-2 rounded-3xl bg-gray-200 text-black hover:bg-gray-300 cursor-pointer w-36 text-center"
                      >
                         Logout
