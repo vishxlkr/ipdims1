@@ -4,7 +4,7 @@ import upload from "../middlewares/multer.js";
 
 import {
    addReviewer,
-   allReviewers,
+   getAllReviewers,
    getAllSubmissions,
    loginAdmin,
    updateReviewerStatus,
@@ -21,7 +21,7 @@ adminRouter.post(
 );
 
 adminRouter.post("/login", loginAdmin);
-adminRouter.get("/all-reviewer", authAdmin, allReviewers);
+adminRouter.get("/all-reviewer", authAdmin, getAllReviewers);
 adminRouter.post("/change-availability", authAdmin, updateReviewerStatus);
 adminRouter.get("/submissions", authAdmin, getAllSubmissions);
 // adminRouter.post("/cancel-appointment", authAdmin, appointmentCancel);
