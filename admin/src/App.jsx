@@ -1,54 +1,89 @@
 import React, { useContext } from "react";
-import Login from "./pages/Login";
-import { ToastContainer, toast } from "react-toastify";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { AdminContext } from "./context/AdminContext";
+import { ReviewerContext } from "./context/ReviewerContext";
+
+import Login from "./pages/Login";
+import DashboardLayout from "./components/DashboardLayout";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminSubmissions from "./pages/admin/AdminSubmissions";
+import ManageReviewers from "./pages/admin/ManageReviewers";
+import AdminAuthors from "./pages/admin/AdminAuthors";
+
+// Reviewer Pages
+import ReviewerDashboard from "./pages/reviewer/ReviewerDashboard";
+import ReviewerSubmissions from "./pages/reviewer/ReviewerSubmissions";
+import ReviewerProfile from "./pages/reviewer/ReviewerProfile";
 import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
-import AllAppointments from "./pages/Admin/AllAppointments";
-
-import Dashboard from "./pages/Admin/Dashboard";
-import AddReviewer from "./pages/Admin/";
-import ReviewerList from "./pages/Admin/DoctorsList";
-import { Route, Routes } from "react-router-dom";
-import { DoctorContext } from "./context/DoctorContext";
-import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
-
-import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
-import DoctorProfile from "./pages/Doctor/DoctorProfile";
 
 const App = () => {
    const { aToken } = useContext(AdminContext);
-   const { dToken } = useContext(DoctorContext);
-   return aToken || dToken ? (
-      <div className="bg-[#f8f9fd]">
-         <ToastContainer />
-         <Navbar />
-         <div className="flex items-start">
-            <Sidebar />
-            <Routes>
-               {/* admin route */}
-               <Route path="/" element={<></>} />
-               <Route path="/admin-dashboard" element={<Dashboard />} />
-               <Route path="/all-appointments" element={<AllAppointments />} />
-               <Route path="/add-doctor" element={<AddDoctor />} />
-               <Route path="/doctor-list" element={<DoctorsList />} />
+   const { rToken } = useContext(ReviewerContext);
 
-               {/* doctor route */}
-               <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-               <Route
-                  path="/doctor-appointments"
-                  element={<DoctorAppointments />}
-               />
-               <Route path="/doctor-profile" element={<DoctorProfile />} />
-            </Routes>
-         </div>
-      </div>
-   ) : (
+   const isAdmin = Boolean(aToken);
+   const isReviewer = Boolean(rToken);
+
+   return (
       <>
-         <Login />
+         <Navbar />
          <ToastContainer />
+         <Routes>
+            {/* Login Route */}
+            <Route
+               path="/login"
+               element={isAdmin || isReviewer ? <Navigate to="/" /> : <Login />}
+            />
+
+            {/* Admin Routes */}
+            {isAdmin && (
+               <Route path="/" element={<DashboardLayout />}>
+                  <Route index element={<Navigate to="admin/dashboard" />} />
+                  <Route path="admin/dashboard" element={<AdminDashboard />} />
+                  <Route
+                     path="admin/submissions"
+                     element={<AdminSubmissions />}
+                  />
+                  <Route path="admin/reviewers" element={<ManageReviewers />} />
+                  <Route path="admin/authors" element={<AdminAuthors />} />
+               </Route>
+            )}
+
+            {/* Reviewer Routes */}
+            {isReviewer && (
+               <Route path="/" element={<DashboardLayout />}>
+                  <Route index element={<Navigate to="reviewer/dashboard" />} />
+                  <Route
+                     path="reviewer/dashboard"
+                     element={<ReviewerDashboard />}
+                  />
+                  <Route
+                     path="reviewer/submissions"
+                     element={<ReviewerSubmissions />}
+                  />
+                  <Route
+                     path="reviewer/profile"
+                     element={<ReviewerProfile />}
+                  />
+               </Route>
+            )}
+
+            {/* Fallback */}
+            <Route
+               path="*"
+               element={
+                  isAdmin || isReviewer ? (
+                     <Navigate to="/" />
+                  ) : (
+                     <Navigate to="/login" />
+                  )
+               }
+            />
+         </Routes>
       </>
    );
 };
