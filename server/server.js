@@ -5,6 +5,7 @@ import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
+import reviewerRouter from "./routes/reviewerRoutes.js";
 
 // app config
 const app = express();
@@ -26,6 +27,7 @@ connectCloudinary();
 
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/reviewer", reviewerRouter);
 
 app.get("/", (req, res) => {
    res.send("api working");

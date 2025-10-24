@@ -1,19 +1,22 @@
 import React, { useContext } from "react";
 import { AdminContext } from "../context/AdminContext";
 import { NavLink } from "react-router-dom";
-import { assets } from "../assets/assets";
-import { DoctorContext } from "../context/ReviewerContext";
+import { ReviewerContext } from "../context/ReviewerContext";
 
 const Sidebar = () => {
    const { aToken } = useContext(AdminContext);
-   const { dToken } = useContext(DoctorContext);
+   const { rToken } = useContext(ReviewerContext);
+
+   const isAdmin = Boolean(aToken);
+   const isReviewer = !aToken && Boolean(rToken); // ✅ Admin priority
 
    return (
       <div className="min-h-screen bg-white border-r">
-         {aToken && (
+         {/* ✅ Admin Sidebar */}
+         {isAdmin && (
             <ul className="text-[#515151] mt-5">
                <NavLink
-                  to={"/my-profile"}
+                  to="/admin/dashboard"
                   className={({ isActive }) =>
                      `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
                         isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
@@ -23,47 +26,50 @@ const Sidebar = () => {
                   <img src={assets.home_icon} alt="" />
                   <p className="hidden md:block">Dashboard</p>
                </NavLink>
+
                <NavLink
-                  to={"/all-appointments"}
+                  to="/admin/submissions"
                   className={({ isActive }) =>
-                     `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
+                     `flex items-center gap-3 py-3.5 px-3 md:px-9 cursor-pointer ${
                         isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
                      }`
                   }
                >
-                  <img src={assets.appointment_icon} alt="" />
-                  <p className="hidden md:block">Appointments</p>
+                  <img src={assets.document_icon} alt="" />
+                  <p className="hidden md:block">All Submissions</p>
                </NavLink>
+
                <NavLink
-                  to={"/add-doctor"}
+                  to="/admin/reviewers"
                   className={({ isActive }) =>
-                     `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
-                        isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
-                     }`
-                  }
-               >
-                  <img src={assets.add_icon} alt="" />
-                  <p className="hidden md:block">Add Doctor</p>
-               </NavLink>
-               <NavLink
-                  to={"/doctor-list"}
-                  className={({ isActive }) =>
-                     `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
+                     `flex items-center gap-3 py-3.5 px-3 md:px-9 cursor-pointer ${
                         isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
                      }`
                   }
                >
                   <img src={assets.people_icon} alt="" />
-                  <p className="hidden md:block">Doctors List</p>
+                  <p className="hidden md:block">Manage Reviewers</p>
+               </NavLink>
+
+               <NavLink
+                  to="/admin/authors"
+                  className={({ isActive }) =>
+                     `flex items-center gap-3 py-3.5 px-3 md:px-9 cursor-pointer ${
+                        isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
+                     }`
+                  }
+               >
+                  <img src={assets.user_icon} alt="" />
+                  <p className="hidden md:block">Authors</p>
                </NavLink>
             </ul>
          )}
 
-         {/* ---------------------doctor sidebar --------------------------------- */}
-         {dToken && (
+         {/* ✅ Reviewer Sidebar */}
+         {isReviewer && (
             <ul className="text-[#515151] mt-5">
                <NavLink
-                  to={"/doctor-dashboard"}
+                  to="/reviewer/dashboard"
                   className={({ isActive }) =>
                      `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
                         isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
@@ -73,28 +79,29 @@ const Sidebar = () => {
                   <img src={assets.home_icon} alt="" />
                   <p className="hidden md:block">Dashboard</p>
                </NavLink>
+
                <NavLink
-                  to={"/doctor-appointments"}
+                  to="/reviewer/submissions"
                   className={({ isActive }) =>
-                     `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
+                     `flex items-center gap-3 py-3.5 px-3 md:px-9 cursor-pointer ${
                         isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
                      }`
                   }
                >
-                  <img src={assets.appointment_icon} alt="" />
-                  <p className="hidden md:block">Appointments</p>
+                  <img src={assets.document_icon} alt="" />
+                  <p className="hidden md:block">Assigned Submissions</p>
                </NavLink>
 
                <NavLink
-                  to={"/doctor-profile"}
+                  to="/reviewer/profile"
                   className={({ isActive }) =>
-                     `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${
+                     `flex items-center gap-3 py-3.5 px-3 md:px-9 cursor-pointer ${
                         isActive ? "bg-[#f2f3ff] border-r-4 border-primary" : ""
                      }`
                   }
                >
-                  <img src={assets.people_icon} alt="" />
-                  <p className="hidden md:block">Profile</p>
+                  <img src={assets.user_icon} alt="" />
+                  <p className="hidden md:block">My Profile</p>
                </NavLink>
             </ul>
          )}

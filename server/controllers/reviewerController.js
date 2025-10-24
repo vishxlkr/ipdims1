@@ -1,6 +1,6 @@
 import reviewerModel from "../models/reviewerModel.js";
 import submissionModel from "../models/submissionModel.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 // api to login reviewer
@@ -89,5 +89,147 @@ export const updateReviewerProfile = async (req, res) => {
          message: "Failed to update profile",
          error,
       });
+   }
+};
+
+// api to get all the assigned submission
+export const getAssignedSubmissions = async (req, res) => {
+   try {
+      const reviewerId = req.user.id; // from authReviewer middleware
+
+      const submissions = await submissionModel
+         .find({ reviewer: reviewerId })
+         .populate("user", "name email affiliation") // populate user basic data
+         .sort({ createdAt: -1 });
+
+      res.json({ success: true, submissions });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Failed to fetch assigned submissions",
+         error,
+      });
+   }
+};
+
+// api to get the specific submission by id
+export const getAssignedSubmissionById = async (req, res) => {
+   try {
+      const reviewerId = req.user.id;
+      const { id } = req.params;
+
+      const submission = await submissionModel
+         .findOne({ _id: id, reviewer: reviewerId }) // ensure assigned to that reviewer
+         .populate("user", "name email affiliation");
+
+      if (!submission)
+         return res.status(404).json({
+            success: false,
+            message: "Submission not found or not assigned to you",
+         });
+
+      res.json({ success: true, submission });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Failed to fetch submission details",
+         error,
+      });
+   }
+};
+
+// api for the reviwer dashboard
+export const getDashboardStats = async (req, res) => {
+   try {
+      const reviewerId = req.user.id;
+
+      const total = await submissionModel.countDocuments({
+         reviewer: reviewerId,
+      });
+      const pending = await submissionModel.countDocuments({
+         reviewer: reviewerId,
+         status: "Under Review",
+      });
+      const accepted = await submissionModel.countDocuments({
+         reviewer: reviewerId,
+         status: "Accepted",
+      });
+      const rejected = await submissionModel.countDocuments({
+         reviewer: reviewerId,
+         status: "Rejected",
+      });
+      const revisionRequested = await submissionModel.countDocuments({
+         reviewer: reviewerId,
+         status: "Revision Requested",
+      });
+
+      res.json({
+         success: true,
+         stats: {
+            total,
+            pending,
+            accepted,
+            rejected,
+            revisionRequested,
+         },
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Failed to fetch dashboard data",
+         error: error.message,
+      });
+   }
+};
+
+// api to give feedback by the reviewer
+
+export const submitReview = async (req, res) => {
+   try {
+      const { id: submissionId } = req.params;
+      const reviewerId = req.user.id;
+      const { feedbackText, rating, decision } = req.body;
+
+      const submission = await submissionModel.findOne({
+         _id: submissionId,
+         reviewer: reviewerId,
+      });
+
+      if (!submission) {
+         return res.status(403).json({
+            success: false,
+            message: "Not authorized for this submission",
+         });
+      }
+
+      if (!feedbackText) {
+         return res.status(400).json({
+            success: false,
+            message: "Feedback is required",
+         });
+      }
+
+      submission.feedback = {
+         reviewer: reviewerId,
+         text: feedbackText,
+         rating: rating || null,
+         decision: decision || "Under Review",
+         reviewedAt: new Date(),
+      };
+
+      if (req.file) {
+         submission.reviewFile = req.file.path;
+      }
+
+      submission.status = decision || "Under Review";
+      await submission.save();
+
+      res.json({
+         success: true,
+         message: "Review submitted successfully",
+         submission,
+      });
+   } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
    }
 };
