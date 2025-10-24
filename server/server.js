@@ -9,14 +9,14 @@ import adminRouter from "./routes/adminRoutes.js";
 // app config
 const app = express();
 
+// middlewares
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
-
-// middlewares
-app.use(express.json());
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
 
 // api endpoint
 // app.use("/api/admin", adminRouter);

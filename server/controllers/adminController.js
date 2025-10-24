@@ -20,8 +20,6 @@ export const loginAdmin = async (req, res) => {
       } else {
          res.json({ success: false, message: "Invalid credentials" });
       }
-
-      console.log("admin loggedin");
    } catch (error) {
       console.log(error);
       res.json({ success: false, message: error.message });
@@ -106,6 +104,7 @@ export const addReviewer = async (req, res) => {
 
       const newReviewer = new reviewerModel(reviewerData);
       await newReviewer.save();
+      console.log("reviwer added ");
 
       res.json({ success: true, message: "Reviewer added successfully" });
    } catch (error) {
@@ -209,7 +208,7 @@ export const getAllSubmissions = async (req, res) => {
       const submissions = await submissionModel
          .find()
          .sort({ createdAt: -1 }) // newest first
-         .populate("user", "name email affiliation"); // optional, if author is referenced
+         .populate("author", "name email affiliation"); // optional, if author is referenced
 
       res.status(200).json({
          success: true,
@@ -230,7 +229,7 @@ export const getSubmissionById = async (req, res) => {
    try {
       const submission = await submissionModel
          .findById(req.params.id)
-         .populate("user", "name email organization") // populate user info
+         .populate("author", "name email organization") // populate user info
          .populate("reviewer", "name email organization"); // populate reviewer info
 
       if (!submission) {
@@ -292,7 +291,7 @@ export const assignSubmission = async (req, res) => {
       // Populate for response
       const populatedSubmission = await submissionModel
          .findById(submissionId)
-         .populate("user", "name email organization")
+         .populate("author", "name email organization")
          .populate("reviewer", "name email organization");
 
       res.status(200).json({
@@ -325,7 +324,7 @@ export const changeSubmissionStatus = async (req, res) => {
 
       const submission = await submissionModel
          .findById(submissionId)
-         .populate("user", "name email organization")
+         .populate("author", "name email organization")
          .populate("reviewer", "name email organization");
 
       if (!submission) {
@@ -438,12 +437,10 @@ export const getUserSubmissions = async (req, res) => {
          .populate("reviewer", "name email organization"); // optional: populate reviewer info
 
       if (!submissions || submissions.length === 0) {
-         return res
-            .status(404)
-            .json({
-               success: false,
-               message: "No submissions found for this user",
-            });
+         return res.status(404).json({
+            success: false,
+            message: "No submissions found for this user",
+         });
       }
 
       res.status(200).json({ success: true, submissions });
