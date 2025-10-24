@@ -95,19 +95,23 @@ export const updateReviewerProfile = async (req, res) => {
 // api to get all the assigned submission
 export const getAssignedSubmissions = async (req, res) => {
    try {
-      const reviewerId = req.user.id; // from authReviewer middleware
+      const reviewerId = req.user.id;
 
       const submissions = await submissionModel
          .find({ reviewer: reviewerId })
-         .populate("user", "name email affiliation") // populate user basic data
+         .populate("author", "name email affiliation")
          .sort({ createdAt: -1 });
 
-      res.json({ success: true, submissions });
+      res.json({
+         success: true,
+         submissions,
+         message: "Fetched assigned submissions",
+      });
    } catch (error) {
+      console.log("Fetch Assigned Submissions Error:", error);
       res.status(500).json({
          success: false,
          message: "Failed to fetch assigned submissions",
-         error,
       });
    }
 };
