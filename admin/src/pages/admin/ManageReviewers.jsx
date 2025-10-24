@@ -53,9 +53,12 @@ const ManageReviewers = () => {
    const fetchReviewers = async () => {
       try {
          setLoading(true);
-         const { data } = await axios.get(`${backendUrl}/api/admin/all-reviewer`, {
-            headers: { atoken },
-         });
+         const { data } = await axios.get(
+            `${backendUrl}/api/admin/all-reviewer`,
+            {
+               headers: { atoken },
+            }
+         );
 
          if (data.success) {
             setReviewers(data.reviewers || []);
@@ -64,7 +67,9 @@ const ManageReviewers = () => {
          }
       } catch (error) {
          console.error("Error fetching reviewers:", error);
-         toast.error(error.response?.data?.message || "Error fetching reviewers");
+         toast.error(
+            error.response?.data?.message || "Error fetching reviewers"
+         );
       } finally {
          setLoading(false);
       }
@@ -76,13 +81,77 @@ const ManageReviewers = () => {
       if (searchTerm) {
          filtered = filtered.filter(
             (reviewer) =>
-               reviewer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               reviewer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               reviewer.organization?.toLowerCase().includes(searchTerm.toLowerCase())
+               reviewer.name
+                  ?.toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+               reviewer.email
+                  ?.toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+               reviewer.organization
+                  ?.toLowerCase()
+                  .includes(searchTerm.toLowerCase())
          );
       }
 
       setFilteredReviewers(filtered);
+   };
+
+   const handleViewDetails = async (reviewerId) => {
+      try {
+         const { data } = await axios.get(
+            `${backendUrl}/api/admin/reviewer/${reviewerId}`,
+            {
+               headers: { atoken },
+            }
+         );
+
+         if (data.success) {
+            setSelectedReviewer(data.reviewer);
+            setShowDetailsModal(true);
+         }
+      } catch (error) {
+         console.error("Error fetching reviewer details:", error);
+         toast.error("Failed to load reviewer details");
+      }
+   };
+
+   const handleToggleStatus = async (reviewerId, currentStatus) => {
+      try {
+         const { data } = await axios.post(
+            `${backendUrl}/api/admin/change-availability/${reviewerId}`,
+            {
+               isActive: !currentStatus,
+            },
+            { headers: { atoken } }
+         );
+
+         if (data.success) {
+            toast.success(
+               `Reviewer ${
+                  !currentStatus ? "activated" : "deactivated"
+               } successfully!`
+            );
+            fetchReviewers();
+         } else {
+            toast.error(data.message || "Failed to update status");
+         }
+      } catch (error) {
+         console.error("Error updating reviewer status:", error);
+         toast.error(
+            error.response?.data?.message || "Failed to update status"
+         );
+      }
+   };
+
+   const handleInputChange = (e) => {
+      setFormData({
+         ...formData,
+         [e.target.name]: e.target.value,
+      });
+   };
+
+   const handleImageChange = (e) => {
+      setImageFile(e.target.files[0]);
    };
 
    const handleAddReviewer = async (e) => {
@@ -111,12 +180,16 @@ const ManageReviewers = () => {
             submitData.append("image", imageFile);
          }
 
-         const { data } = await axios.post(`${backendUrl}/api/admin/add-reviewer`, submitData, {
-            headers: {
-               atoken,
-               "Content-Type": "multipart/form-data",
-            },
-         });
+         const { data } = await axios.post(
+            `${backendUrl}/api/admin/add-reviewer`,
+            submitData,
+            {
+               headers: {
+                  atoken,
+                  "Content-Type": "multipart/form-data",
+               },
+            }
+         );
 
          if (data.success) {
             toast.success("Reviewer added successfully!");
@@ -157,8 +230,12 @@ const ManageReviewers = () => {
          <div className="max-w-7xl mx-auto">
             <div className="mb-8 flex items-center justify-between">
                <div>
-                  <h1 className="text-4xl font-bold text-gray-800">Manage Reviewers</h1>
-                  <p className="text-gray-600 mt-2">Add, view, and manage reviewer accounts</p>
+                  <h1 className="text-4xl font-bold text-gray-800">
+                     Manage Reviewers
+                  </h1>
+                  <p className="text-gray-600 mt-2">
+                     Add, view, and manage reviewer accounts
+                  </p>
                </div>
                <button
                   onClick={() => setShowAddModal(true)}
@@ -182,7 +259,11 @@ const ManageReviewers = () => {
                      />
                   </div>
                   <span className="text-gray-700 font-semibold">
-                     Total: <span className="text-blue-600">{filteredReviewers.length}</span> reviewers
+                     Total:{" "}
+                     <span className="text-blue-600">
+                        {filteredReviewers.length}
+                     </span>{" "}
+                     reviewers
                   </span>
                </div>
             </div>
@@ -209,14 +290,27 @@ const ManageReviewers = () => {
                                     </div>
                                  )}
                                  <div>
-                                    <h3 className="text-lg font-bold text-gray-900">{reviewer.name}</h3>
-                                    <p className="text-sm text-gray-500">{reviewer.designation || "Reviewer"}</p>
+                                    <h3 className="text-lg font-bold text-gray-900">
+                                       {reviewer.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-500">
+                                       {reviewer.designation || "Reviewer"}
+                                    </p>
                                  </div>
                               </div>
                               <button
-                                 onClick={() => handleToggleStatus(reviewer._id, reviewer.isActive)}
+                                 onClick={() =>
+                                    handleToggleStatus(
+                                       reviewer._id,
+                                       reviewer.isActive
+                                    )
+                                 }
                                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                 title={reviewer.isActive ? "Deactivate" : "Activate"}
+                                 title={
+                                    reviewer.isActive
+                                       ? "Deactivate"
+                                       : "Activate"
+                                 }
                               >
                                  {reviewer.isActive ? (
                                     <ToggleRight className="w-6 h-6 text-green-600" />
@@ -229,7 +323,9 @@ const ManageReviewers = () => {
                            <div className="space-y-2 mb-4">
                               <div className="flex items-center gap-2 text-sm text-gray-600">
                                  <Mail className="w-4 h-4 text-gray-400" />
-                                 <span className="truncate">{reviewer.email}</span>
+                                 <span className="truncate">
+                                    {reviewer.email}
+                                 </span>
                               </div>
                               {reviewer.phone && (
                                  <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -240,30 +336,37 @@ const ManageReviewers = () => {
                               {reviewer.organization && (
                                  <div className="flex items-center gap-2 text-sm text-gray-600">
                                     <Building className="w-4 h-4 text-gray-400" />
-                                    <span className="truncate">{reviewer.organization}</span>
+                                    <span className="truncate">
+                                       {reviewer.organization}
+                                    </span>
                                  </div>
                               )}
                            </div>
 
-                           {reviewer.specialization && reviewer.specialization.length > 0 && (
-                              <div className="mb-4">
-                                 <div className="flex flex-wrap gap-1">
-                                    {reviewer.specialization.slice(0, 2).map((spec, idx) => (
-                                       <span
-                                          key={idx}
-                                          className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
-                                       >
-                                          {spec}
-                                       </span>
-                                    ))}
-                                    {reviewer.specialization.length > 2 && (
-                                       <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                                          +{reviewer.specialization.length - 2}
-                                       </span>
-                                    )}
+                           {reviewer.specialization &&
+                              reviewer.specialization.length > 0 && (
+                                 <div className="mb-4">
+                                    <div className="flex flex-wrap gap-1">
+                                       {reviewer.specialization
+                                          .slice(0, 2)
+                                          .map((spec, idx) => (
+                                             <span
+                                                key={idx}
+                                                className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
+                                             >
+                                                {spec}
+                                             </span>
+                                          ))}
+                                       {reviewer.specialization.length > 2 && (
+                                          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                                             +
+                                             {reviewer.specialization.length -
+                                                2}
+                                          </span>
+                                       )}
+                                    </div>
                                  </div>
-                              </div>
-                           )}
+                              )}
 
                            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                               <span
@@ -287,7 +390,9 @@ const ManageReviewers = () => {
                      </div>
                   ))
                ) : (
-                  <div className="col-span-full text-center py-12 text-gray-500">No reviewers found</div>
+                  <div className="col-span-full text-center py-12 text-gray-500">
+                     No reviewers found
+                  </div>
                )}
             </div>
          </div>
@@ -297,7 +402,9 @@ const ManageReviewers = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between z-10">
-                     <h2 className="text-2xl font-bold text-gray-800">Add New Reviewer</h2>
+                     <h2 className="text-2xl font-bold text-gray-800">
+                        Add New Reviewer
+                     </h2>
                      <button
                         onClick={() => setShowAddModal(false)}
                         className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
@@ -324,7 +431,9 @@ const ManageReviewers = () => {
                         </div>
 
                         <div>
-                           <label className="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                           <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Email *
+                           </label>
                            <input
                               type="email"
                               name="email"
@@ -353,7 +462,9 @@ const ManageReviewers = () => {
                         </div>
 
                         <div>
-                           <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+                           <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Phone
+                           </label>
                            <input
                               type="tel"
                               name="phone"
@@ -393,7 +504,9 @@ const ManageReviewers = () => {
                         </div>
 
                         <div>
-                           <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
+                           <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              Gender
+                           </label>
                            <select
                               name="gender"
                               value={formData.gender}
@@ -435,7 +548,9 @@ const ManageReviewers = () => {
                      </div>
 
                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                           Address
+                        </label>
                         <input
                            type="text"
                            name="address"
@@ -447,7 +562,9 @@ const ManageReviewers = () => {
                      </div>
 
                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                           Bio
+                        </label>
                         <textarea
                            name="bio"
                            value={formData.bio}
@@ -484,7 +601,9 @@ const ManageReviewers = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
                   <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between z-10">
-                     <h2 className="text-2xl font-bold text-gray-800">Reviewer Details</h2>
+                     <h2 className="text-2xl font-bold text-gray-800">
+                        Reviewer Details
+                     </h2>
                      <button
                         onClick={() => setShowDetailsModal(false)}
                         className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
@@ -507,8 +626,12 @@ const ManageReviewers = () => {
                            </div>
                         )}
                         <div>
-                           <h3 className="text-2xl font-bold text-gray-900">{selectedReviewer.name}</h3>
-                           <p className="text-gray-600">{selectedReviewer.designation || "Reviewer"}</p>
+                           <h3 className="text-2xl font-bold text-gray-900">
+                              {selectedReviewer.name}
+                           </h3>
+                           <p className="text-gray-600">
+                              {selectedReviewer.designation || "Reviewer"}
+                           </p>
                            <span
                               className={`mt-2 inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                                  selectedReviewer.isActive
@@ -516,7 +639,9 @@ const ManageReviewers = () => {
                                     : "bg-gray-100 text-gray-600"
                               }`}
                            >
-                              {selectedReviewer.isActive ? "Active" : "Inactive"}
+                              {selectedReviewer.isActive
+                                 ? "Active"
+                                 : "Inactive"}
                            </span>
                         </div>
                      </div>
@@ -525,38 +650,60 @@ const ManageReviewers = () => {
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                            <div className="flex items-center gap-2 mb-2">
                               <Mail className="text-blue-600" size={18} />
-                              <p className="text-xs text-gray-500 font-semibold">EMAIL</p>
+                              <p className="text-xs text-gray-500 font-semibold">
+                                 EMAIL
+                              </p>
                            </div>
-                           <p className="text-gray-900 font-medium break-all">{selectedReviewer.email}</p>
+                           <p className="text-gray-900 font-medium break-all">
+                              {selectedReviewer.email}
+                           </p>
                         </div>
 
                         {selectedReviewer.phone && (
                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                               <div className="flex items-center gap-2 mb-2">
                                  <Phone className="text-blue-600" size={18} />
-                                 <p className="text-xs text-gray-500 font-semibold">PHONE</p>
+                                 <p className="text-xs text-gray-500 font-semibold">
+                                    PHONE
+                                 </p>
                               </div>
-                              <p className="text-gray-900 font-medium">{selectedReviewer.phone}</p>
+                              <p className="text-gray-900 font-medium">
+                                 {selectedReviewer.phone}
+                              </p>
                            </div>
                         )}
 
                         {selectedReviewer.organization && (
                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 md:col-span-2">
                               <div className="flex items-center gap-2 mb-2">
-                                 <Building className="text-blue-600" size={18} />
-                                 <p className="text-xs text-gray-500 font-semibold">ORGANIZATION</p>
+                                 <Building
+                                    className="text-blue-600"
+                                    size={18}
+                                 />
+                                 <p className="text-xs text-gray-500 font-semibold">
+                                    ORGANIZATION
+                                 </p>
                               </div>
-                              <p className="text-gray-900 font-medium">{selectedReviewer.organization}</p>
+                              <p className="text-gray-900 font-medium">
+                                 {selectedReviewer.organization}
+                              </p>
                            </div>
                         )}
 
                         {selectedReviewer.address && (
                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 md:col-span-2">
                               <div className="flex items-center gap-2 mb-2">
-                                 <Building className="text-blue-600" size={18} />
-                                 <p className="text-xs text-gray-500 font-semibold">ADDRESS</p>
+                                 <Building
+                                    className="text-blue-600"
+                                    size={18}
+                                 />
+                                 <p className="text-xs text-gray-500 font-semibold">
+                                    ADDRESS
+                                 </p>
                               </div>
-                              <p className="text-gray-900 font-medium">{selectedReviewer.address}</p>
+                              <p className="text-gray-900 font-medium">
+                                 {selectedReviewer.address}
+                              </p>
                            </div>
                         )}
 
@@ -564,37 +711,48 @@ const ManageReviewers = () => {
                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                               <div className="flex items-center gap-2 mb-2">
                                  <User className="text-blue-600" size={18} />
-                                 <p className="text-xs text-gray-500 font-semibold">GENDER</p>
+                                 <p className="text-xs text-gray-500 font-semibold">
+                                    GENDER
+                                 </p>
                               </div>
-                              <p className="text-gray-900 font-medium">{selectedReviewer.gender}</p>
+                              <p className="text-gray-900 font-medium">
+                                 {selectedReviewer.gender}
+                              </p>
                            </div>
                         )}
                      </div>
 
-                     {selectedReviewer.specialization && selectedReviewer.specialization.length > 0 && (
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                           <div className="flex items-center gap-2 mb-3">
-                              <Award className="text-blue-600" size={18} />
-                              <p className="text-xs text-gray-500 font-semibold">SPECIALIZATION</p>
+                     {selectedReviewer.specialization &&
+                        selectedReviewer.specialization.length > 0 && (
+                           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                              <div className="flex items-center gap-2 mb-3">
+                                 <Award className="text-blue-600" size={18} />
+                                 <p className="text-xs text-gray-500 font-semibold">
+                                    SPECIALIZATION
+                                 </p>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                 {selectedReviewer.specialization.map(
+                                    (spec, idx) => (
+                                       <span
+                                          key={idx}
+                                          className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium"
+                                       >
+                                          {spec}
+                                       </span>
+                                    )
+                                 )}
+                              </div>
                            </div>
-                           <div className="flex flex-wrap gap-2">
-                              {selectedReviewer.specialization.map((spec, idx) => (
-                                 <span
-                                    key={idx}
-                                    className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium"
-                                 >
-                                    {spec}
-                                 </span>
-                              ))}
-                           </div>
-                        </div>
-                     )}
+                        )}
 
                      {selectedReviewer.bio && (
                         <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                            <div className="flex items-center gap-2 mb-3">
                               <FileText className="text-blue-600" size={18} />
-                              <p className="text-xs text-gray-500 font-semibold">BIO</p>
+                              <p className="text-xs text-gray-500 font-semibold">
+                                 BIO
+                              </p>
                            </div>
                            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
                               {selectedReviewer.bio}
@@ -602,17 +760,23 @@ const ManageReviewers = () => {
                         </div>
                      )}
 
-                     {selectedReviewer.assignedSubmissions && selectedReviewer.assignedSubmissions.length > 0 && (
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                           <div className="flex items-center gap-2 mb-3">
-                              <FileText className="text-purple-600" size={18} />
-                              <p className="text-xs text-gray-500 font-semibold">ASSIGNED SUBMISSIONS</p>
+                     {selectedReviewer.assignedSubmissions &&
+                        selectedReviewer.assignedSubmissions.length > 0 && (
+                           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                              <div className="flex items-center gap-2 mb-3">
+                                 <FileText
+                                    className="text-purple-600"
+                                    size={18}
+                                 />
+                                 <p className="text-xs text-gray-500 font-semibold">
+                                    ASSIGNED SUBMISSIONS
+                                 </p>
+                              </div>
+                              <p className="text-2xl font-bold text-purple-600">
+                                 {selectedReviewer.assignedSubmissions.length}
+                              </p>
                            </div>
-                           <p className="text-2xl font-bold text-purple-600">
-                              {selectedReviewer.assignedSubmissions.length}
-                           </p>
-                        </div>
-                     )}
+                        )}
                   </div>
 
                   <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6 flex justify-end">
@@ -630,53 +794,4 @@ const ManageReviewers = () => {
    );
 };
 
-export default ManageReviewers;ViewDetails = async (reviewerId) => {
-      try {
-         const { data } = await axios.get(`${backendUrl}/api/admin/reviewer/${reviewerId}`, {
-            headers: { atoken },
-         });
-
-         if (data.success) {
-            setSelectedReviewer(data.reviewer);
-            setShowDetailsModal(true);
-         }
-      } catch (error) {
-         console.error("Error fetching reviewer details:", error);
-         toast.error("Failed to load reviewer details");
-      }
-   };
-
-   const handleToggleStatus = async (reviewerId, currentStatus) => {
-      try {
-         const { data } = await axios.post(
-            `${backendUrl}/api/admin/change-availability/${reviewerId}`,
-            {
-               isActive: !currentStatus,
-            },
-            { headers: { atoken } }
-         );
-
-         if (data.success) {
-            toast.success(`Reviewer ${!currentStatus ? "activated" : "deactivated"} successfully!`);
-            fetchReviewers();
-         } else {
-            toast.error(data.message || "Failed to update status");
-         }
-      } catch (error) {
-         console.error("Error updating reviewer status:", error);
-         toast.error(error.response?.data?.message || "Failed to update status");
-      }
-   };
-
-   const handleInputChange = (e) => {
-      setFormData({
-         ...formData,
-         [e.target.name]: e.target.value,
-      });
-   };
-
-   const handleImageChange = (e) => {
-      setImageFile(e.target.files[0]);
-   };
-
-   const handle
+export default ManageReviewers;

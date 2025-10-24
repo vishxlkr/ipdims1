@@ -38,7 +38,6 @@ const submissionSchema = new mongoose.Schema(
             "Accepted",
             "Rejected",
             "Revision Requested",
-            "Registered",
          ],
          default: "Pending",
       },

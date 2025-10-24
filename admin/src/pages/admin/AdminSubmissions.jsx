@@ -16,6 +16,13 @@ import {
    Tag,
    AlignLeft,
    Calendar,
+   Clock,
+   CheckCircle,
+   XCircle,
+   AlertCircle,
+   FileEdit,
+   UserCheck,
+   MessageSquare,
 } from "lucide-react";
 
 const AdminSubmissions = () => {
@@ -106,6 +113,22 @@ const AdminSubmissions = () => {
 
       setFilteredSubmissions(filtered);
    };
+
+   const getStatistics = () => {
+      return {
+         pending: submissions.filter((s) => s.status === "Pending").length,
+         underReview: submissions.filter((s) => s.status === "Under Review")
+            .length,
+         accepted: submissions.filter((s) => s.status === "Accepted").length,
+         rejected: submissions.filter((s) => s.status === "Rejected").length,
+         revisionRequested: submissions.filter(
+            (s) => s.status === "Revision Requested"
+         ).length,
+         unassigned: submissions.filter((s) => !s.reviewer).length,
+      };
+   };
+
+   const stats = getStatistics();
 
    const handleViewDetails = async (submissionId) => {
       try {
@@ -224,19 +247,105 @@ const AdminSubmissions = () => {
    }
 
    return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 p-6 -m-8">
          <div className="max-w-7xl mx-auto">
             <div className="mb-8">
-               <h1 className="text-4xl font-bold text-gray-800">
-                  Manage Submissions
-               </h1>
+               <h1 className="text-4xl font-bold text-gray-800">Submissions</h1>
                <p className="text-gray-600 mt-2">
-                  View, assign, and manage all manuscript submissions
+                  Manage and track all manuscript submissions
                </p>
             </div>
 
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+               <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-yellow-500">
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-xs text-gray-500 font-semibold uppercase">
+                           Pending
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                           {stats.pending}
+                        </p>
+                     </div>
+                     <Clock className="w-8 h-8 text-yellow-500" />
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-blue-500">
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-xs text-gray-500 font-semibold uppercase">
+                           Under Review
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                           {stats.underReview}
+                        </p>
+                     </div>
+                     <FileEdit className="w-8 h-8 text-blue-500" />
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-xs text-gray-500 font-semibold uppercase">
+                           Accepted
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                           {stats.accepted}
+                        </p>
+                     </div>
+                     <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-red-500">
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-xs text-gray-500 font-semibold uppercase">
+                           Rejected
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                           {stats.rejected}
+                        </p>
+                     </div>
+                     <XCircle className="w-8 h-8 text-red-500" />
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-orange-500">
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-xs text-gray-500 font-semibold uppercase">
+                           Revision Req
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                           {stats.revisionRequested}
+                        </p>
+                     </div>
+                     <AlertCircle className="w-8 h-8 text-orange-500" />
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-xl shadow-md p-4 border-l-4 border-purple-500">
+                  <div className="flex items-center justify-between">
+                     <div>
+                        <p className="text-xs text-gray-500 font-semibold uppercase">
+                           Unassigned
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                           {stats.unassigned}
+                        </p>
+                     </div>
+                     <UserCheck className="w-8 h-8 text-purple-500" />
+                  </div>
+               </div>
+            </div>
+
+            {/* Search and Filter */}
             <div className="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
                      <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                      <input
@@ -260,26 +369,23 @@ const AdminSubmissions = () => {
                         <option value="Under Review">Under Review</option>
                         <option value="Accepted">Accepted</option>
                         <option value="Rejected">Rejected</option>
+                        <option value="Revision Requested">
+                           Revision Requested
+                        </option>
                      </select>
-                  </div>
-
-                  <div className="text-right flex items-center justify-end">
-                     <span className="text-gray-700 font-semibold">
-                        Total:{" "}
-                        <span className="text-blue-600">
-                           {filteredSubmissions.length}
-                        </span>{" "}
-                        submissions
-                     </span>
                   </div>
                </div>
             </div>
 
+            {/* Submissions Table */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
                <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                      <thead className="bg-gray-50">
                         <tr>
+                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                              Paper #
+                           </th>
                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                               Title
                            </th>
@@ -293,114 +399,137 @@ const AdminSubmissions = () => {
                               Reviewer
                            </th>
                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                              Date
-                           </th>
-                           <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                               Actions
                            </th>
                         </tr>
                      </thead>
                      <tbody className="bg-white divide-y divide-gray-200">
                         {filteredSubmissions.length > 0 ? (
-                           filteredSubmissions.map((submission) => (
-                              <tr
-                                 key={submission._id}
-                                 className="hover:bg-gray-50 transition-colors"
-                              >
-                                 <td className="px-6 py-4">
-                                    <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
-                                       {submission.title || "Untitled"}
-                                    </div>
-                                 </td>
-                                 <td className="px-6 py-4">
-                                    <div className="text-sm text-gray-900">
-                                       {submission.author?.name || "N/A"}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                       {submission.author?.email}
-                                    </div>
-                                 </td>
-                                 <td className="px-6 py-4">
-                                    <select
-                                       value={submission.status}
-                                       onChange={(e) =>
-                                          handleChangeStatus(
-                                             submission._id,
-                                             e.target.value
-                                          )
-                                       }
-                                       onClick={(e) => e.stopPropagation()}
-                                       className={`px-3 py-1.5 text-xs font-semibold rounded-full border-0 cursor-pointer ${
-                                          submission.status === "Accepted"
-                                             ? "bg-green-100 text-green-800"
-                                             : submission.status === "Rejected"
-                                             ? "bg-red-100 text-red-800"
-                                             : submission.status ===
-                                               "Under Review"
-                                             ? "bg-blue-100 text-blue-800"
-                                             : "bg-yellow-100 text-yellow-800"
-                                       }`}
+                           [...filteredSubmissions]
+                              .sort(
+                                 (a, b) =>
+                                    new Date(b.createdAt) -
+                                    new Date(a.createdAt)
+                              )
+                              .map((submission, index) => {
+                                 const paperNumber =
+                                    submissions.length -
+                                    submissions.findIndex(
+                                       (s) => s._id === submission._id
+                                    );
+                                 return (
+                                    <tr
+                                       key={submission._id}
+                                       className="hover:bg-gray-50 transition-colors"
                                     >
-                                       <option value="Pending">Pending</option>
-                                       <option value="Under Review">
-                                          Under Review
-                                       </option>
-                                       <option value="Accepted">
-                                          Accepted
-                                       </option>
-                                       <option value="Rejected">
-                                          Rejected
-                                       </option>
-                                    </select>
-                                 </td>
-                                 <td className="px-6 py-4">
-                                    {submission.reviewer ? (
-                                       <div className="text-sm text-gray-700">
-                                          {submission.reviewer.name}
-                                       </div>
-                                    ) : (
-                                       <button
-                                          onClick={() =>
-                                             openAssignModal(submission)
-                                          }
-                                          className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                       >
-                                          <UserPlus className="w-4 h-4" />
-                                          Assign
-                                       </button>
-                                    )}
-                                 </td>
-                                 <td className="px-6 py-4 text-sm text-gray-600">
-                                    {new Date(
-                                       submission.createdAt
-                                    ).toLocaleDateString()}
-                                 </td>
-                                 <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2">
-                                       <button
-                                          onClick={() =>
-                                             handleViewDetails(submission._id)
-                                          }
-                                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                          title="View Details"
-                                       >
-                                          <Eye className="w-5 h-5" />
-                                       </button>
-                                       <button
-                                          onClick={() =>
-                                             handleDeleteSubmission(
-                                                submission._id
-                                             )
-                                          }
-                                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                          title="Delete"
-                                       >
-                                          <Trash2 className="w-5 h-5" />
-                                       </button>
-                                    </div>
-                                 </td>
-                              </tr>
-                           ))
+                                       <td className="px-6 py-4">
+                                          <div className="text-sm font-bold text-gray-700">
+                                             #{paperNumber}
+                                          </div>
+                                       </td>
+                                       <td className="px-6 py-4">
+                                          <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
+                                             {submission.title || "Untitled"}
+                                          </div>
+                                       </td>
+                                       <td className="px-6 py-4">
+                                          <div className="text-sm text-gray-900">
+                                             {submission.author?.name || "N/A"}
+                                          </div>
+                                          <div className="text-xs text-gray-500">
+                                             {submission.author?.email}
+                                          </div>
+                                       </td>
+                                       <td className="px-6 py-4">
+                                          <select
+                                             value={submission.status}
+                                             onChange={(e) =>
+                                                handleChangeStatus(
+                                                   submission._id,
+                                                   e.target.value
+                                                )
+                                             }
+                                             onClick={(e) =>
+                                                e.stopPropagation()
+                                             }
+                                             className={`px-3 py-1.5 text-xs font-semibold rounded-full border-0 cursor-pointer ${
+                                                submission.status === "Accepted"
+                                                   ? "bg-green-100 text-green-800"
+                                                   : submission.status ===
+                                                     "Rejected"
+                                                   ? "bg-red-100 text-red-800"
+                                                   : submission.status ===
+                                                     "Under Review"
+                                                   ? "bg-blue-100 text-blue-800"
+                                                   : submission.status ===
+                                                     "Revision Requested"
+                                                   ? "bg-orange-100 text-orange-800"
+                                                   : "bg-yellow-100 text-yellow-800"
+                                             }`}
+                                          >
+                                             <option value="Pending">
+                                                Pending
+                                             </option>
+                                             <option value="Under Review">
+                                                Under Review
+                                             </option>
+                                             <option value="Accepted">
+                                                Accepted
+                                             </option>
+                                             <option value="Rejected">
+                                                Rejected
+                                             </option>
+                                             <option value="Revision Requested">
+                                                Revision Requested
+                                             </option>
+                                          </select>
+                                       </td>
+                                       <td className="px-6 py-4">
+                                          {submission.reviewer ? (
+                                             <div className="text-sm text-gray-700">
+                                                {submission.reviewer.name}
+                                             </div>
+                                          ) : (
+                                             <button
+                                                onClick={() =>
+                                                   openAssignModal(submission)
+                                                }
+                                                className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                             >
+                                                <UserPlus className="w-4 h-4" />
+                                                Assign
+                                             </button>
+                                          )}
+                                       </td>
+                                       <td className="px-6 py-4">
+                                          <div className="flex items-center gap-2">
+                                             <button
+                                                onClick={() =>
+                                                   handleViewDetails(
+                                                      submission._id
+                                                   )
+                                                }
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                title="View Details"
+                                             >
+                                                <Eye className="w-5 h-5" />
+                                             </button>
+                                             <button
+                                                onClick={() =>
+                                                   handleDeleteSubmission(
+                                                      submission._id
+                                                   )
+                                                }
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete"
+                                             >
+                                                <Trash2 className="w-5 h-5" />
+                                             </button>
+                                          </div>
+                                       </td>
+                                    </tr>
+                                 );
+                              })
                         ) : (
                            <tr>
                               <td
@@ -443,6 +572,9 @@ const AdminSubmissions = () => {
                                  ? "bg-red-100 text-red-800"
                                  : selectedSubmission.status === "Under Review"
                                  ? "bg-blue-100 text-blue-800"
+                                 : selectedSubmission.status ===
+                                   "Revision Requested"
+                                 ? "bg-orange-100 text-orange-800"
                                  : "bg-yellow-100 text-yellow-800"
                            }`}
                         >
@@ -601,6 +733,23 @@ const AdminSubmissions = () => {
                            </p>
                            <p className="text-sm text-gray-600">
                               {selectedSubmission.reviewer.email}
+                           </p>
+                        </div>
+                     )}
+
+                     {selectedSubmission.feedback && (
+                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                           <div className="flex items-center gap-2 mb-3">
+                              <MessageSquare
+                                 className="text-blue-600"
+                                 size={18}
+                              />
+                              <p className="text-xs text-blue-600 font-semibold">
+                                 REVIEWER FEEDBACK
+                              </p>
+                           </div>
+                           <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
+                              {selectedSubmission.feedback}
                            </p>
                         </div>
                      )}
